@@ -333,10 +333,10 @@ namespace Altseed2
         }
 
         /// <summary>
-        /// クオータニオンを元に回転行列(右手)を取得します。
+        /// クオータニオンを元に回転行列(左手)を取得します。
         /// </summary>
         /// <param name="quaternion">使用するクオータニオン</param>
-        public static Matrix44F GetQuaternion(Vector4F quaternion)
+        public static Matrix44F GetQuaternion(Quaternion quaternion)
         {
             var result = Identity;
 
@@ -351,13 +351,13 @@ namespace Altseed2
             var wz = quaternion.W * quaternion.Z;
 
             result.Values[0 * 4 + 0] = 1.0f - 2.0f * (yy + zz);
-            result.Values[0 * 4 + 1] = 2.0f * (xy - wz);
-            result.Values[0 * 4 + 2] = 2.0f * (xz + wy);
-            result.Values[1 * 4 + 0] = 2.0f * (xy + wz);
+            result.Values[0 * 4 + 1] = 2.0f * (xy + wz);
+            result.Values[0 * 4 + 2] = 2.0f * (xz - wy);
+            result.Values[1 * 4 + 0] = 2.0f * (xy - wz);
             result.Values[1 * 4 + 1] = 1.0f - 2.0f * (xx + zz);
-            result.Values[1 * 4 + 2] = 2.0f * (yz - wx);
-            result.Values[2 * 4 + 0] = 2.0f * (xz - wy);
-            result.Values[2 * 4 + 1] = 2.0f * (yz + wx);
+            result.Values[1 * 4 + 2] = 2.0f * (yz + wx);
+            result.Values[2 * 4 + 0] = 2.0f * (xz + wy);
+            result.Values[2 * 4 + 1] = 2.0f * (yz - wx);
             result.Values[2 * 4 + 2] = 1.0f - 2.0f * (xx + yy);
 
             return result;

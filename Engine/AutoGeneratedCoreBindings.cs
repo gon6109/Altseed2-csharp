@@ -6397,7 +6397,7 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern IntPtr cbg_RenderTexture_Create(Vector2I size, int format);
+        private static extern IntPtr cbg_RenderTexture_Create(Vector2I size, int format, [MarshalAs(UnmanagedType.Bool)] bool hasDepthTexture);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -6426,9 +6426,9 @@ namespace Altseed2
         /// </summary>
         /// <param name="size">サイズ</param>
         /// <param name="format">テクスチャのフォーマット</param>
-        public static RenderTexture Create(Vector2I size, TextureFormat format)
+        public static RenderTexture Create(Vector2I size, TextureFormat format, bool hasDepthTexture)
         {
-            var ret = cbg_RenderTexture_Create(size, (int)format);
+            var ret = cbg_RenderTexture_Create(size, (int)format, hasDepthTexture);
             return RenderTexture.TryGetFromCache(ret);
         }
         
@@ -9550,6 +9550,1845 @@ namespace Altseed2
                 if (selfPtr != IntPtr.Zero)
                 {
                     cbg_Renderer_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
+    internal partial class Rendered3D : ISerializable, ICacheKeeper<Rendered3D>
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<Rendered3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<Rendered3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static  Rendered3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                Rendered3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_Rendered3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new Rendered3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<Rendered3D>(newObject);
+            return newObject;
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal IntPtr selfPtr = IntPtr.Zero;
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Matrix44F cbg_Rendered3D_GetTransform(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Rendered3D_SetTransform(IntPtr selfPtr, Matrix44F value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern int cbg_Rendered3D_GetId(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Rendered3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal Rendered3D(MemoryHandle handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        internal Matrix44F Transform
+        {
+            get
+            {
+                if (_Transform != null)
+                {
+                    return _Transform.Value;
+                }
+                var ret = cbg_Rendered3D_GetTransform(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _Transform = value;
+                cbg_Rendered3D_SetTransform(selfPtr, value);
+            }
+        }
+        private Matrix44F? _Transform;
+        
+        internal int Id
+        {
+            get
+            {
+                var ret = cbg_Rendered3D_GetId(selfPtr);
+                return ret;
+            }
+        }
+        
+        
+        #region ISerialiable
+        
+        #region SerializeName
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Transform = "S_Transform";
+        #endregion
+        
+        /// <summary>
+        /// シリアライズされたデータをもとに<see cref="Rendered3D"/>のインスタンスを生成します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected Rendered3D(SerializationInfo info, StreamingContext context) : this(new MemoryHandle(IntPtr.Zero))
+        {
+            var ptr = Call_GetPtr(info);
+            
+            if (ptr == IntPtr.Zero) throw new SerializationException("インスタンス生成に失敗しました");
+            CacheHelper.CacheHandlingOnDeserialization(this, ptr);
+            
+            Transform = info.GetValue<Matrix44F>(S_Transform);
+            
+            OnDeserialize_Constructor(info, context);
+        }
+        
+        /// <summary>
+        /// シリアライズするデータを設定します。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null) throw new ArgumentNullException(nameof(info), "引数がnullです");
+            
+            info.AddValue(S_Transform, Transform);
+            
+            OnGetObjectData(info, context);
+        }
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) => GetObjectData(info, context);
+        
+        /// <summary>
+        /// <see cref="GetObjectData(SerializationInfo, StreamingContext)"/>内で実行されます。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnGetObjectData(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="Rendered3D(SerializationInfo, StreamingContext)"/>内で実行します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnDeserialize_Constructor(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="Rendered3D(SerializationInfo, StreamingContext)"/>内で呼び出される
+        /// デシリアライズ時にselfPtrを取得する操作をここに必ず書くこと
+        /// </summary>
+        /// <param name="ptr">selfPtrとなる値 初期値である<see cref="IntPtr.Zero"/>のままだと<see cref="SerializationException"/>がスローされる</param>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void Deserialize_GetPtr(ref IntPtr ptr, SerializationInfo info);
+        
+        /// <summary>
+        /// 呼び出し禁止
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected private virtual IntPtr Call_GetPtr(SerializationInfo info)
+        {
+            var ptr = IntPtr.Zero;
+            Deserialize_GetPtr(ref ptr, info);
+            return ptr;
+        }
+        
+        #region ICacheKeeper
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IDictionary<IntPtr, WeakReference<Rendered3D>> ICacheKeeper<Rendered3D>.CacheRepo => cacheRepo;
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IntPtr ICacheKeeper<Rendered3D>.Self
+        {
+            get => selfPtr;
+            set
+            {
+                selfPtr = value;
+            }
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ICacheKeeper<Rendered3D>.Release(IntPtr native) => cbg_Rendered3D_Release(native);
+        
+        #endregion
+        
+        #endregion
+        
+        /// <summary>
+        /// <see cref="Rendered3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~Rendered3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_Rendered3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
+    internal sealed partial class RenderedCamera3D : ISerializable, ICacheKeeper<RenderedCamera3D>
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<RenderedCamera3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<RenderedCamera3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static  RenderedCamera3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                RenderedCamera3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_RenderedCamera3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new RenderedCamera3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<RenderedCamera3D>(newObject);
+            return newObject;
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal IntPtr selfPtr = IntPtr.Zero;
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedCamera3D_Create();
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedCamera3D_GetTargetTexture(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedCamera3D_SetTargetTexture(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern RenderPassParameter cbg_RenderedCamera3D_GetRenderPassParameter(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedCamera3D_SetRenderPassParameter(IntPtr selfPtr, RenderPassParameter value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Matrix44F cbg_RenderedCamera3D_GetProjectionMatrix(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Matrix44F cbg_RenderedCamera3D_GetViewMatrix(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedCamera3D_SetViewMatrix(IntPtr selfPtr, Matrix44F value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedCamera3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal RenderedCamera3D(MemoryHandle handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        internal RenderTexture TargetTexture
+        {
+            get
+            {
+                if (_TargetTexture != null)
+                {
+                    return _TargetTexture;
+                }
+                var ret = cbg_RenderedCamera3D_GetTargetTexture(selfPtr);
+                return RenderTexture.TryGetFromCache(ret);
+            }
+            set
+            {
+                _TargetTexture = value;
+                cbg_RenderedCamera3D_SetTargetTexture(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private RenderTexture _TargetTexture;
+        
+        internal RenderPassParameter RenderPassParameter
+        {
+            get
+            {
+                if (_RenderPassParameter != null)
+                {
+                    return _RenderPassParameter.Value;
+                }
+                var ret = cbg_RenderedCamera3D_GetRenderPassParameter(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _RenderPassParameter = value;
+                cbg_RenderedCamera3D_SetRenderPassParameter(selfPtr, value);
+            }
+        }
+        private RenderPassParameter? _RenderPassParameter;
+        
+        public Matrix44F ProjectionMatrix
+        {
+            get
+            {
+                var ret = cbg_RenderedCamera3D_GetProjectionMatrix(selfPtr);
+                return ret;
+            }
+        }
+        
+        internal Matrix44F ViewMatrix
+        {
+            get
+            {
+                if (_ViewMatrix != null)
+                {
+                    return _ViewMatrix.Value;
+                }
+                var ret = cbg_RenderedCamera3D_GetViewMatrix(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _ViewMatrix = value;
+                cbg_RenderedCamera3D_SetViewMatrix(selfPtr, value);
+            }
+        }
+        private Matrix44F? _ViewMatrix;
+        
+        internal static RenderedCamera3D Create()
+        {
+            var ret = cbg_RenderedCamera3D_Create();
+            return RenderedCamera3D.TryGetFromCache(ret);
+        }
+        
+        
+        #region ISerialiable
+        
+        #region SerializeName
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_TargetTexture = "S_TargetTexture";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_RenderPassParameter = "S_RenderPassParameter";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_ViewMatrix = "S_ViewMatrix";
+        #endregion
+        
+        /// <summary>
+        /// シリアライズされたデータをもとに<see cref="RenderedCamera3D"/>のインスタンスを生成します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private RenderedCamera3D(SerializationInfo info, StreamingContext context) : this(new MemoryHandle(IntPtr.Zero))
+        {
+            var ptr = Call_GetPtr(info);
+            
+            if (ptr == IntPtr.Zero) throw new SerializationException("インスタンス生成に失敗しました");
+            CacheHelper.CacheHandlingOnDeserialization(this, ptr);
+            
+            var TargetTexture = info.GetValue<RenderTexture>(S_TargetTexture);
+            ((IDeserializationCallback)TargetTexture)?.OnDeserialization(null);
+            this.TargetTexture = TargetTexture;
+            RenderPassParameter = info.GetValue<RenderPassParameter>(S_RenderPassParameter);
+            ViewMatrix = info.GetValue<Matrix44F>(S_ViewMatrix);
+            
+            OnDeserialize_Constructor(info, context);
+        }
+        
+        /// <summary>
+        /// シリアライズするデータを設定します。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null) throw new ArgumentNullException(nameof(info), "引数がnullです");
+            
+            info.AddValue(S_TargetTexture, TargetTexture);
+            info.AddValue(S_RenderPassParameter, RenderPassParameter);
+            info.AddValue(S_ViewMatrix, ViewMatrix);
+            
+            OnGetObjectData(info, context);
+        }
+        
+        /// <summary>
+        /// <see cref="ISerializable.GetObjectData(SerializationInfo, StreamingContext)"/>内で実行されます。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnGetObjectData(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="RenderedCamera3D(SerializationInfo, StreamingContext)"/>内で実行します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnDeserialize_Constructor(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="RenderedCamera3D(SerializationInfo, StreamingContext)"/>内で呼び出される
+        /// デシリアライズ時にselfPtrを取得する操作をここに必ず書くこと
+        /// </summary>
+        /// <param name="ptr">selfPtrとなる値 初期値である<see cref="IntPtr.Zero"/>のままだと<see cref="SerializationException"/>がスローされる</param>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void Deserialize_GetPtr(ref IntPtr ptr, SerializationInfo info);
+        
+        /// <summary>
+        /// 呼び出し禁止
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private IntPtr Call_GetPtr(SerializationInfo info)
+        {
+            var ptr = IntPtr.Zero;
+            Deserialize_GetPtr(ref ptr, info);
+            return ptr;
+        }
+        
+        #region ICacheKeeper
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IDictionary<IntPtr, WeakReference<RenderedCamera3D>> ICacheKeeper<RenderedCamera3D>.CacheRepo => cacheRepo;
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IntPtr ICacheKeeper<RenderedCamera3D>.Self
+        {
+            get => selfPtr;
+            set
+            {
+                selfPtr = value;
+            }
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ICacheKeeper<RenderedCamera3D>.Release(IntPtr native) => cbg_RenderedCamera3D_Release(native);
+        
+        #endregion
+        
+        #endregion
+        
+        /// <summary>
+        /// <see cref="RenderedCamera3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~RenderedCamera3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_RenderedCamera3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
+    internal sealed partial class RenderedSprite3D : Rendered3D, ISerializable, ICacheKeeper<RenderedSprite3D>
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<RenderedSprite3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<RenderedSprite3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new RenderedSprite3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                RenderedSprite3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_RenderedSprite3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new RenderedSprite3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<RenderedSprite3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedSprite3D_Create();
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern AlphaBlend cbg_RenderedSprite3D_GetAlphaBlend(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedSprite3D_SetAlphaBlend(IntPtr selfPtr, AlphaBlend value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern RectF cbg_RenderedSprite3D_GetSrc(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedSprite3D_SetSrc(IntPtr selfPtr, RectF value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Color cbg_RenderedSprite3D_GetColor(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedSprite3D_SetColor(IntPtr selfPtr, Color value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedSprite3D_GetTexture(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedSprite3D_SetTexture(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedSprite3D_GetMaterial(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedSprite3D_SetMaterial(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedSprite3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal RenderedSprite3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        internal AlphaBlend AlphaBlend
+        {
+            get
+            {
+                if (_AlphaBlend != null)
+                {
+                    return _AlphaBlend.Value;
+                }
+                var ret = cbg_RenderedSprite3D_GetAlphaBlend(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _AlphaBlend = value;
+                cbg_RenderedSprite3D_SetAlphaBlend(selfPtr, value);
+            }
+        }
+        private AlphaBlend? _AlphaBlend;
+        
+        internal RectF Src
+        {
+            get
+            {
+                if (_Src != null)
+                {
+                    return _Src.Value;
+                }
+                var ret = cbg_RenderedSprite3D_GetSrc(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _Src = value;
+                cbg_RenderedSprite3D_SetSrc(selfPtr, value);
+            }
+        }
+        private RectF? _Src;
+        
+        internal Color Color
+        {
+            get
+            {
+                if (_Color != null)
+                {
+                    return _Color.Value;
+                }
+                var ret = cbg_RenderedSprite3D_GetColor(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _Color = value;
+                cbg_RenderedSprite3D_SetColor(selfPtr, value);
+            }
+        }
+        private Color? _Color;
+        
+        internal TextureBase Texture
+        {
+            get
+            {
+                if (_Texture != null)
+                {
+                    return _Texture;
+                }
+                var ret = cbg_RenderedSprite3D_GetTexture(selfPtr);
+                return TextureBase.TryGetFromCache(ret);
+            }
+            set
+            {
+                _Texture = value;
+                cbg_RenderedSprite3D_SetTexture(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private TextureBase _Texture;
+        
+        internal Material Material
+        {
+            get
+            {
+                if (_Material != null)
+                {
+                    return _Material;
+                }
+                var ret = cbg_RenderedSprite3D_GetMaterial(selfPtr);
+                return Material.TryGetFromCache(ret);
+            }
+            set
+            {
+                _Material = value;
+                cbg_RenderedSprite3D_SetMaterial(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private Material _Material;
+        
+        internal static RenderedSprite3D Create()
+        {
+            var ret = cbg_RenderedSprite3D_Create();
+            return RenderedSprite3D.TryGetFromCache(ret);
+        }
+        
+        
+        #region ISerialiable
+        
+        #region SerializeName
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_AlphaBlend = "S_AlphaBlend";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Src = "S_Src";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Color = "S_Color";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Texture = "S_Texture";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Material = "S_Material";
+        #endregion
+        
+        /// <summary>
+        /// シリアライズされたデータをもとに<see cref="RenderedSprite3D"/>のインスタンスを生成します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private RenderedSprite3D(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            var ptr = selfPtr;
+            if (ptr == IntPtr.Zero) ptr = Call_GetPtr(info);
+            
+            if (ptr == IntPtr.Zero) throw new SerializationException("インスタンス生成に失敗しました");
+            CacheHelper.CacheHandlingOnDeserialization(this, ptr);
+            
+            AlphaBlend = info.GetValue<AlphaBlend>(S_AlphaBlend);
+            Src = info.GetValue<RectF>(S_Src);
+            Color = info.GetValue<Color>(S_Color);
+            var Texture = info.GetValue<TextureBase>(S_Texture);
+            ((IDeserializationCallback)Texture)?.OnDeserialization(null);
+            this.Texture = Texture;
+            Material = info.GetValue<Material>(S_Material);
+            
+            OnDeserialize_Constructor(info, context);
+        }
+        
+        /// <summary>
+        /// シリアライズするデータを設定します。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            
+            info.AddValue(S_AlphaBlend, AlphaBlend);
+            info.AddValue(S_Src, Src);
+            info.AddValue(S_Color, Color);
+            info.AddValue(S_Texture, Texture);
+            info.AddValue(S_Material, Material);
+            
+            OnGetObjectData(info, context);
+        }
+        
+        /// <summary>
+        /// <see cref="GetObjectData(SerializationInfo, StreamingContext)"/>内で実行されます。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnGetObjectData(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="RenderedSprite3D(SerializationInfo, StreamingContext)"/>内で実行します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnDeserialize_Constructor(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="RenderedSprite3D(SerializationInfo, StreamingContext)"/>内で呼び出される
+        /// デシリアライズ時にselfPtrを取得する操作をここに必ず書くこと
+        /// </summary>
+        /// <param name="ptr">selfPtrとなる値 初期値である<see cref="IntPtr.Zero"/>のままだと<see cref="SerializationException"/>がスローされる</param>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void Deserialize_GetPtr(ref IntPtr ptr, SerializationInfo info);
+        
+        /// <summary>
+        /// 呼び出し禁止
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected private override IntPtr Call_GetPtr(SerializationInfo info)
+        {
+            var ptr = IntPtr.Zero;
+            Deserialize_GetPtr(ref ptr, info);
+            return ptr;
+        }
+        
+        #region ICacheKeeper
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IDictionary<IntPtr, WeakReference<RenderedSprite3D>> ICacheKeeper<RenderedSprite3D>.CacheRepo => cacheRepo;
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IntPtr ICacheKeeper<RenderedSprite3D>.Self
+        {
+            get => selfPtr;
+            set
+            {
+                selfPtr = value;
+            }
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ICacheKeeper<RenderedSprite3D>.Release(IntPtr native) => cbg_RenderedSprite3D_Release(native);
+        
+        #endregion
+        
+        #endregion
+        
+        /// <summary>
+        /// <see cref="RenderedSprite3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~RenderedSprite3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_RenderedSprite3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
+    internal sealed partial class RenderedText3D : Rendered3D, ISerializable, ICacheKeeper<RenderedText3D>
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<RenderedText3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<RenderedText3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new RenderedText3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                RenderedText3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_RenderedText3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new RenderedText3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<RenderedText3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedText3D_Create();
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern AlphaBlend cbg_RenderedText3D_GetAlphaBlend(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetAlphaBlend(IntPtr selfPtr, AlphaBlend value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedText3D_GetMaterialGlyph(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetMaterialGlyph(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedText3D_GetMaterialImage(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetMaterialImage(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Color cbg_RenderedText3D_GetColor(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetColor(IntPtr selfPtr, Color value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedText3D_GetFont(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetFont(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedText3D_GetText(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetText(IntPtr selfPtr, [MarshalAs(UnmanagedType.LPWStr)] string value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_RenderedText3D_GetIsEnableKerning(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetIsEnableKerning(IntPtr selfPtr, [MarshalAs(UnmanagedType.Bool)] bool value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern int cbg_RenderedText3D_GetWritingDirection(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetWritingDirection(IntPtr selfPtr, int value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_RenderedText3D_GetCharacterSpace(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetCharacterSpace(IntPtr selfPtr, float value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_RenderedText3D_GetLineGap(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetLineGap(IntPtr selfPtr, float value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_RenderedText3D_GetFontSize(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_SetFontSize(IntPtr selfPtr, float value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector2F cbg_RenderedText3D_GetRenderingSize(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedText3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal RenderedText3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        internal AlphaBlend AlphaBlend
+        {
+            get
+            {
+                if (_AlphaBlend != null)
+                {
+                    return _AlphaBlend.Value;
+                }
+                var ret = cbg_RenderedText3D_GetAlphaBlend(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _AlphaBlend = value;
+                cbg_RenderedText3D_SetAlphaBlend(selfPtr, value);
+            }
+        }
+        private AlphaBlend? _AlphaBlend;
+        
+        internal Material MaterialGlyph
+        {
+            get
+            {
+                if (_MaterialGlyph != null)
+                {
+                    return _MaterialGlyph;
+                }
+                var ret = cbg_RenderedText3D_GetMaterialGlyph(selfPtr);
+                return Material.TryGetFromCache(ret);
+            }
+            set
+            {
+                _MaterialGlyph = value;
+                cbg_RenderedText3D_SetMaterialGlyph(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private Material _MaterialGlyph;
+        
+        internal Material MaterialImage
+        {
+            get
+            {
+                if (_MaterialImage != null)
+                {
+                    return _MaterialImage;
+                }
+                var ret = cbg_RenderedText3D_GetMaterialImage(selfPtr);
+                return Material.TryGetFromCache(ret);
+            }
+            set
+            {
+                _MaterialImage = value;
+                cbg_RenderedText3D_SetMaterialImage(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private Material _MaterialImage;
+        
+        internal Color Color
+        {
+            get
+            {
+                if (_Color != null)
+                {
+                    return _Color.Value;
+                }
+                var ret = cbg_RenderedText3D_GetColor(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _Color = value;
+                cbg_RenderedText3D_SetColor(selfPtr, value);
+            }
+        }
+        private Color? _Color;
+        
+        internal Font Font
+        {
+            get
+            {
+                if (_Font != null)
+                {
+                    return _Font;
+                }
+                var ret = cbg_RenderedText3D_GetFont(selfPtr);
+                return Font.TryGetFromCache(ret);
+            }
+            set
+            {
+                _Font = value;
+                cbg_RenderedText3D_SetFont(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private Font _Font;
+        
+        internal string Text
+        {
+            get
+            {
+                if (_Text != null)
+                {
+                    return _Text;
+                }
+                var ret = cbg_RenderedText3D_GetText(selfPtr);
+                return System.Runtime.InteropServices.Marshal.PtrToStringUni(ret);
+            }
+            set
+            {
+                _Text = value;
+                cbg_RenderedText3D_SetText(selfPtr, value);
+            }
+        }
+        private string _Text;
+        
+        internal bool IsEnableKerning
+        {
+            get
+            {
+                if (_IsEnableKerning != null)
+                {
+                    return _IsEnableKerning.Value;
+                }
+                var ret = cbg_RenderedText3D_GetIsEnableKerning(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _IsEnableKerning = value;
+                cbg_RenderedText3D_SetIsEnableKerning(selfPtr, value);
+            }
+        }
+        private bool? _IsEnableKerning;
+        
+        internal WritingDirection WritingDirection
+        {
+            get
+            {
+                if (_WritingDirection != null)
+                {
+                    return _WritingDirection.Value;
+                }
+                var ret = cbg_RenderedText3D_GetWritingDirection(selfPtr);
+                return (WritingDirection)ret;
+            }
+            set
+            {
+                _WritingDirection = value;
+                cbg_RenderedText3D_SetWritingDirection(selfPtr, (int)value);
+            }
+        }
+        private WritingDirection? _WritingDirection;
+        
+        internal float CharacterSpace
+        {
+            get
+            {
+                if (_CharacterSpace != null)
+                {
+                    return _CharacterSpace.Value;
+                }
+                var ret = cbg_RenderedText3D_GetCharacterSpace(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _CharacterSpace = value;
+                cbg_RenderedText3D_SetCharacterSpace(selfPtr, value);
+            }
+        }
+        private float? _CharacterSpace;
+        
+        internal float LineGap
+        {
+            get
+            {
+                if (_LineGap != null)
+                {
+                    return _LineGap.Value;
+                }
+                var ret = cbg_RenderedText3D_GetLineGap(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _LineGap = value;
+                cbg_RenderedText3D_SetLineGap(selfPtr, value);
+            }
+        }
+        private float? _LineGap;
+        
+        internal float FontSize
+        {
+            get
+            {
+                if (_FontSize != null)
+                {
+                    return _FontSize.Value;
+                }
+                var ret = cbg_RenderedText3D_GetFontSize(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _FontSize = value;
+                cbg_RenderedText3D_SetFontSize(selfPtr, value);
+            }
+        }
+        private float? _FontSize;
+        
+        public Vector2F RenderingSize
+        {
+            get
+            {
+                var ret = cbg_RenderedText3D_GetRenderingSize(selfPtr);
+                return ret;
+            }
+        }
+        
+        internal static RenderedText3D Create()
+        {
+            var ret = cbg_RenderedText3D_Create();
+            return RenderedText3D.TryGetFromCache(ret);
+        }
+        
+        
+        #region ISerialiable
+        
+        #region SerializeName
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_AlphaBlend = "S_AlphaBlend";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_MaterialGlyph = "S_MaterialGlyph";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_MaterialImage = "S_MaterialImage";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Color = "S_Color";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Font = "S_Font";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Text = "S_Text";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_IsEnableKerning = "S_IsEnableKerning";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_WritingDirection = "S_WritingDirection";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_CharacterSpace = "S_CharacterSpace";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_LineGap = "S_LineGap";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_FontSize = "S_FontSize";
+        #endregion
+        
+        /// <summary>
+        /// シリアライズされたデータをもとに<see cref="RenderedText3D"/>のインスタンスを生成します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private RenderedText3D(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            var ptr = selfPtr;
+            if (ptr == IntPtr.Zero) ptr = Call_GetPtr(info);
+            
+            if (ptr == IntPtr.Zero) throw new SerializationException("インスタンス生成に失敗しました");
+            CacheHelper.CacheHandlingOnDeserialization(this, ptr);
+            
+            AlphaBlend = info.GetValue<AlphaBlend>(S_AlphaBlend);
+            MaterialGlyph = info.GetValue<Material>(S_MaterialGlyph);
+            MaterialImage = info.GetValue<Material>(S_MaterialImage);
+            Color = info.GetValue<Color>(S_Color);
+            var Font = info.GetValue<Font>(S_Font);
+            ((IDeserializationCallback)Font)?.OnDeserialization(null);
+            this.Font = Font;
+            Text = info.GetString(S_Text);
+            IsEnableKerning = info.GetBoolean(S_IsEnableKerning);
+            WritingDirection = info.GetValue<WritingDirection>(S_WritingDirection);
+            CharacterSpace = info.GetSingle(S_CharacterSpace);
+            LineGap = info.GetSingle(S_LineGap);
+            FontSize = info.GetSingle(S_FontSize);
+            
+            OnDeserialize_Constructor(info, context);
+        }
+        
+        /// <summary>
+        /// シリアライズするデータを設定します。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            
+            info.AddValue(S_AlphaBlend, AlphaBlend);
+            info.AddValue(S_MaterialGlyph, MaterialGlyph);
+            info.AddValue(S_MaterialImage, MaterialImage);
+            info.AddValue(S_Color, Color);
+            info.AddValue(S_Font, Font);
+            info.AddValue(S_Text, Text);
+            info.AddValue(S_IsEnableKerning, IsEnableKerning);
+            info.AddValue(S_WritingDirection, WritingDirection);
+            info.AddValue(S_CharacterSpace, CharacterSpace);
+            info.AddValue(S_LineGap, LineGap);
+            info.AddValue(S_FontSize, FontSize);
+            
+            OnGetObjectData(info, context);
+        }
+        
+        /// <summary>
+        /// <see cref="GetObjectData(SerializationInfo, StreamingContext)"/>内で実行されます。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnGetObjectData(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="RenderedText3D(SerializationInfo, StreamingContext)"/>内で実行します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnDeserialize_Constructor(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="RenderedText3D(SerializationInfo, StreamingContext)"/>内で呼び出される
+        /// デシリアライズ時にselfPtrを取得する操作をここに必ず書くこと
+        /// </summary>
+        /// <param name="ptr">selfPtrとなる値 初期値である<see cref="IntPtr.Zero"/>のままだと<see cref="SerializationException"/>がスローされる</param>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void Deserialize_GetPtr(ref IntPtr ptr, SerializationInfo info);
+        
+        /// <summary>
+        /// 呼び出し禁止
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected private override IntPtr Call_GetPtr(SerializationInfo info)
+        {
+            var ptr = IntPtr.Zero;
+            Deserialize_GetPtr(ref ptr, info);
+            return ptr;
+        }
+        
+        #region ICacheKeeper
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IDictionary<IntPtr, WeakReference<RenderedText3D>> ICacheKeeper<RenderedText3D>.CacheRepo => cacheRepo;
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IntPtr ICacheKeeper<RenderedText3D>.Self
+        {
+            get => selfPtr;
+            set
+            {
+                selfPtr = value;
+            }
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ICacheKeeper<RenderedText3D>.Release(IntPtr native) => cbg_RenderedText3D_Release(native);
+        
+        #endregion
+        
+        #endregion
+        
+        /// <summary>
+        /// <see cref="RenderedText3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~RenderedText3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_RenderedText3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
+    internal sealed partial class RenderedPolygon3D : Rendered3D, ISerializable, ICacheKeeper<RenderedPolygon3D>
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<RenderedPolygon3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<RenderedPolygon3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new RenderedPolygon3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                RenderedPolygon3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_RenderedPolygon3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new RenderedPolygon3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<RenderedPolygon3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedPolygon3D_Create();
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedPolygon3D_SetDefaultIndexBuffer(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern AlphaBlend cbg_RenderedPolygon3D_GetAlphaBlend(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedPolygon3D_SetAlphaBlend(IntPtr selfPtr, AlphaBlend value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedPolygon3D_GetBuffers(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedPolygon3D_SetBuffers(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedPolygon3D_GetVertexes(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedPolygon3D_SetVertexes(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern RectF cbg_RenderedPolygon3D_GetSrc(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedPolygon3D_SetSrc(IntPtr selfPtr, RectF value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedPolygon3D_GetTexture(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedPolygon3D_SetTexture(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_RenderedPolygon3D_GetMaterial(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedPolygon3D_SetMaterial(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_RenderedPolygon3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal RenderedPolygon3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        internal AlphaBlend AlphaBlend
+        {
+            get
+            {
+                if (_AlphaBlend != null)
+                {
+                    return _AlphaBlend.Value;
+                }
+                var ret = cbg_RenderedPolygon3D_GetAlphaBlend(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _AlphaBlend = value;
+                cbg_RenderedPolygon3D_SetAlphaBlend(selfPtr, value);
+            }
+        }
+        private AlphaBlend? _AlphaBlend;
+        
+        internal VertexArray Vertexes
+        {
+            get
+            {
+                if (_Vertexes != null)
+                {
+                    return _Vertexes;
+                }
+                var ret = cbg_RenderedPolygon3D_GetVertexes(selfPtr);
+                return VertexArray.TryGetFromCache(ret);
+            }
+            set
+            {
+                _Vertexes = value;
+                cbg_RenderedPolygon3D_SetVertexes(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private VertexArray _Vertexes;
+        
+        internal RectF Src
+        {
+            get
+            {
+                if (_Src != null)
+                {
+                    return _Src.Value;
+                }
+                var ret = cbg_RenderedPolygon3D_GetSrc(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _Src = value;
+                cbg_RenderedPolygon3D_SetSrc(selfPtr, value);
+            }
+        }
+        private RectF? _Src;
+        
+        internal TextureBase Texture
+        {
+            get
+            {
+                if (_Texture != null)
+                {
+                    return _Texture;
+                }
+                var ret = cbg_RenderedPolygon3D_GetTexture(selfPtr);
+                return TextureBase.TryGetFromCache(ret);
+            }
+            set
+            {
+                _Texture = value;
+                cbg_RenderedPolygon3D_SetTexture(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private TextureBase _Texture;
+        
+        internal Material Material
+        {
+            get
+            {
+                if (_Material != null)
+                {
+                    return _Material;
+                }
+                var ret = cbg_RenderedPolygon3D_GetMaterial(selfPtr);
+                return Material.TryGetFromCache(ret);
+            }
+            set
+            {
+                _Material = value;
+                cbg_RenderedPolygon3D_SetMaterial(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private Material _Material;
+        
+        internal static RenderedPolygon3D Create()
+        {
+            var ret = cbg_RenderedPolygon3D_Create();
+            return RenderedPolygon3D.TryGetFromCache(ret);
+        }
+        
+        
+        #region ISerialiable
+        
+        #region SerializeName
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_AlphaBlend = "S_AlphaBlend";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Buffers = "S_Buffers";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Vertexes = "S_Vertexes";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Src = "S_Src";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Texture = "S_Texture";
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Material = "S_Material";
+        #endregion
+        
+        /// <summary>
+        /// シリアライズされたデータをもとに<see cref="RenderedPolygon3D"/>のインスタンスを生成します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private RenderedPolygon3D(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            var ptr = selfPtr;
+            if (ptr == IntPtr.Zero) ptr = Call_GetPtr(info);
+            
+            if (ptr == IntPtr.Zero) throw new SerializationException("インスタンス生成に失敗しました");
+            CacheHelper.CacheHandlingOnDeserialization(this, ptr);
+            
+            AlphaBlend = info.GetValue<AlphaBlend>(S_AlphaBlend);
+            Buffers = info.GetValue<Int32Array>(S_Buffers);
+            Vertexes = info.GetValue<VertexArray>(S_Vertexes);
+            Src = info.GetValue<RectF>(S_Src);
+            var Texture = info.GetValue<TextureBase>(S_Texture);
+            ((IDeserializationCallback)Texture)?.OnDeserialization(null);
+            this.Texture = Texture;
+            Material = info.GetValue<Material>(S_Material);
+            
+            OnDeserialize_Constructor(info, context);
+        }
+        
+        /// <summary>
+        /// シリアライズするデータを設定します。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            
+            info.AddValue(S_AlphaBlend, AlphaBlend);
+            info.AddValue(S_Buffers, Buffers);
+            info.AddValue(S_Vertexes, Vertexes);
+            info.AddValue(S_Src, Src);
+            info.AddValue(S_Texture, Texture);
+            info.AddValue(S_Material, Material);
+            
+            OnGetObjectData(info, context);
+        }
+        
+        /// <summary>
+        /// <see cref="GetObjectData(SerializationInfo, StreamingContext)"/>内で実行されます。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnGetObjectData(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="RenderedPolygon3D(SerializationInfo, StreamingContext)"/>内で実行します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnDeserialize_Constructor(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="RenderedPolygon3D(SerializationInfo, StreamingContext)"/>内で呼び出される
+        /// デシリアライズ時にselfPtrを取得する操作をここに必ず書くこと
+        /// </summary>
+        /// <param name="ptr">selfPtrとなる値 初期値である<see cref="IntPtr.Zero"/>のままだと<see cref="SerializationException"/>がスローされる</param>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void Deserialize_GetPtr(ref IntPtr ptr, SerializationInfo info);
+        
+        /// <summary>
+        /// 呼び出し禁止
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected private override IntPtr Call_GetPtr(SerializationInfo info)
+        {
+            var ptr = IntPtr.Zero;
+            Deserialize_GetPtr(ref ptr, info);
+            return ptr;
+        }
+        
+        #region ICacheKeeper
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IDictionary<IntPtr, WeakReference<RenderedPolygon3D>> ICacheKeeper<RenderedPolygon3D>.CacheRepo => cacheRepo;
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IntPtr ICacheKeeper<RenderedPolygon3D>.Self
+        {
+            get => selfPtr;
+            set
+            {
+                selfPtr = value;
+            }
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ICacheKeeper<RenderedPolygon3D>.Release(IntPtr native) => cbg_RenderedPolygon3D_Release(native);
+        
+        #endregion
+        
+        #endregion
+        
+        /// <summary>
+        /// <see cref="RenderedPolygon3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~RenderedPolygon3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_RenderedPolygon3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    internal sealed partial class Renderer3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<Renderer3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<Renderer3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static  Renderer3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                Renderer3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_Renderer3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new Renderer3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<Renderer3D>(newObject);
+            return newObject;
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal IntPtr selfPtr = IntPtr.Zero;
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_Renderer3D_GetInstance();
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Renderer3D_Initialize(IntPtr selfPtr, IntPtr window, IntPtr graphics);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Renderer3D_Terminate(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Renderer3D_DrawPolygon(IntPtr selfPtr, IntPtr polygon);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Renderer3D_DrawSprite(IntPtr selfPtr, IntPtr sprite);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Renderer3D_DrawText(IntPtr selfPtr, IntPtr text);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Renderer3D_Render(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Renderer3D_ResetCamera(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Renderer3D_SetCamera(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Renderer3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal Renderer3D(MemoryHandle handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        internal RenderedCamera3D Camera
+        {
+            set
+            {
+                cbg_Renderer3D_SetCamera(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        
+        internal static Renderer3D GetInstance()
+        {
+            var ret = cbg_Renderer3D_GetInstance();
+            return Renderer3D.TryGetFromCache(ret);
+        }
+        
+        public bool Initialize(Window window, Graphics graphics)
+        {
+            var ret = cbg_Renderer3D_Initialize(selfPtr, window != null ? window.selfPtr : IntPtr.Zero, graphics != null ? graphics.selfPtr : IntPtr.Zero);
+            return ret;
+        }
+        
+        public void Terminate()
+        {
+            cbg_Renderer3D_Terminate(selfPtr);
+        }
+        
+        internal void DrawPolygon(RenderedPolygon3D polygon)
+        {
+            cbg_Renderer3D_DrawPolygon(selfPtr, polygon != null ? polygon.selfPtr : IntPtr.Zero);
+        }
+        
+        internal void DrawSprite(RenderedSprite3D sprite)
+        {
+            cbg_Renderer3D_DrawSprite(selfPtr, sprite != null ? sprite.selfPtr : IntPtr.Zero);
+        }
+        
+        internal void DrawText(RenderedText3D text)
+        {
+            cbg_Renderer3D_DrawText(selfPtr, text != null ? text.selfPtr : IntPtr.Zero);
+        }
+        
+        internal void Render()
+        {
+            cbg_Renderer3D_Render(selfPtr);
+        }
+        
+        internal void ResetCamera()
+        {
+            cbg_Renderer3D_ResetCamera(selfPtr);
+        }
+        
+        /// <summary>
+        /// <see cref="Renderer3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~Renderer3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_Renderer3D_Release(selfPtr);
                     selfPtr = IntPtr.Zero;
                 }
             }

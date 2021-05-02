@@ -27,6 +27,7 @@ namespace Altseed2
         internal static Node _UpdatedNode;
 
         internal static CameraNodeCollection _CameraNodes;
+        internal static Camera3DNodeCollection _Camera3DNodes;
         internal static RenderedCamera _DefaultCamera;
         internal static DrawnCollection _DrawnCollection;
 
@@ -93,6 +94,7 @@ namespace Altseed2
                 _window = Window.GetInstance();
                 _graphics = Graphics.GetInstance();
                 _renderer = Renderer.GetInstance();
+                _renderer3D = Renderer3D.GetInstance();
                 _cullingSystem = CullingSystem.GetInstance();
                 _tool = Tool.GetInstance();
                 _sound = SoundMixer.GetInstance();
@@ -105,6 +107,7 @@ namespace Altseed2
                 {
                     _DrawnCollection = new DrawnCollection();
                     _CameraNodes = new CameraNodeCollection();
+                    _Camera3DNodes = new Camera3DNodeCollection();
                     _RenderTextureCache = new RenderTextureCache();
 
                     _DefaultCamera = RenderedCamera.Create();
@@ -403,6 +406,13 @@ namespace Altseed2
         private static Renderer _renderer;
 
         /// <summary>
+        /// 3Dレンダラのクラスを取得します。
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Rendererが初期されていなかったり終了していて操作を実行できなかった</exception>
+        internal static Renderer3D Renderer3D => _renderer3D ?? throw new InvalidOperationException("Graphics機能が初期化されていません。");
+        private static Renderer3D _renderer3D;
+
+        /// <summary>
         /// カリングのクラスを取得します。
         /// </summary>
         /// <exception cref="InvalidOperationException">CullingSystemが初期されていなかったり終了していて操作を実行できなかった</exception>
@@ -532,6 +542,28 @@ namespace Altseed2
         {
             if (_CameraNodes is null) throw new InvalidOperationException("Graphics機能が初期化されていません。");
             _CameraNodes.UpdateGroup(camera, oldGroup);
+        }
+
+        #endregion
+
+        #region Camera3DNodeCollection
+
+        internal static void RegisterCamera3DNode(Camera3DNode camera)
+        {
+            if (_Camera3DNodes is null) throw new InvalidOperationException("Graphics機能が初期化されていません。");
+            _Camera3DNodes.AddCamera(camera);
+        }
+
+        internal static void UnregisterCamera3DNode(Camera3DNode camera)
+        {
+            if (_Camera3DNodes is null) throw new InvalidOperationException("Graphics機能が初期化されていません。");
+            _Camera3DNodes.RemoveCamera(camera);
+        }
+
+        internal static void UpdateCamera3DNodeGroup(Camera3DNode camera, ulong oldGroup)
+        {
+            if (_Camera3DNodes is null) throw new InvalidOperationException("Graphics機能が初期化されていません。");
+            _Camera3DNodes.UpdateGroup(camera, oldGroup);
         }
 
         #endregion

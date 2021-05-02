@@ -180,4 +180,65 @@ namespace Altseed2
 
         private bool HasBit(ulong value, uint mask) => (value & mask) != 0;
     }
+
+    internal class Camera3DNodeCollection
+    {
+        private List<Camera3DNode>[] _Lists;
+
+        internal int Count { get; private set; }
+
+        internal Camera3DNodeCollection()
+        {
+            _Lists = new List<Camera3DNode>[Engine.MaxCameraGroupCount];
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+                _Lists[i] = new List<Camera3DNode>();
+
+        }
+
+        internal void AddCamera(Camera3DNode node)
+        {
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+            {
+                var mask = 1u << i;
+                if (HasBit(node.Group, mask))
+                {
+                    _Lists[i].Add(node);
+                }
+            }
+            Count++;
+        }
+
+        internal void RemoveCamera(Camera3DNode node)
+        {
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+            {
+                var mask = 1u << i;
+                if (HasBit(node.Group, mask))
+                {
+                    _Lists[i].Remove(node);
+                }
+            }
+            Count--;
+        }
+
+        internal void UpdateGroup(Camera3DNode node, ulong oldGroup)
+        {
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+            {
+                var mask = 1u << i;
+                if (HasBit(oldGroup, mask) && !HasBit(node.Group, mask))
+                {
+                    _Lists[i].Remove(node);
+                }
+                else if (!HasBit(oldGroup, mask) && HasBit(node.Group, mask))
+                {
+                    _Lists[i].Add(node);
+                }
+            }
+        }
+
+        internal List<Camera3DNode> this[int index] => _Lists[index];
+
+        private bool HasBit(ulong value, uint mask) => (value & mask) != 0;
+    }
 }

@@ -47,6 +47,29 @@ namespace Altseed2
         Vector2F ContentSize { get; }
     }
 
+    /// <summary>
+    /// 描画ノードインターフェース
+    /// </summary>
+    public interface I3DDrawn: IDrawn
+    {
+        internal Rendered3D Rendered { get; }
+
+        /// <summary>
+        /// このノードを描画するかどうかを取得または設定します。
+        /// </summary>
+        bool IsDrawn { get; set; }
+
+        /// <summary>
+        /// 先祖の<see cref="IsDrawn" />を考慮して、このノードを描画するかどうかを取得します。
+        /// </summary>
+        bool IsDrawnActually { get; internal set; }
+
+        /// <summary>
+        /// コンテンツのサイズを取得します。
+        /// </summary>
+        Vector3F ContentSize { get; }
+    }
+
     internal static class DrawnExtension
     {
         /// <summary>

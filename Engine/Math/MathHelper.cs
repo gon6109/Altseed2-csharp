@@ -88,6 +88,23 @@ namespace Altseed2
         }
 
         /// <summary>
+        /// Transform3Dを計算します。
+        /// </summary>
+        /// <param name="position">座標</param>
+        /// <param name="quaternion">回転</param>
+        /// <param name="scale">拡大率</param>
+        /// <returns></returns>
+        internal static Matrix44F CalcTransform3D(Vector3F position, Quaternion quaternion, Vector3F scale)
+        {
+            var matPosition = Matrix44F.GetTranslation3D(position);
+            var matRotate = Matrix44F.GetQuaternion(quaternion);
+            var matScale = Matrix44F.GetScale3D(scale);
+
+            return matPosition * matRotate * matScale;
+            // NOTE: 一気に計算したほうがよさそう
+        }
+
+        /// <summary>
         /// 指定した頂点を全て含む長方形のうち左上と右下の座標を割り出します。
         /// </summary>
         /// <param name="min">左上の座標</param>

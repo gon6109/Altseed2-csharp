@@ -16,6 +16,31 @@ namespace Altseed2
         public static Quaternion Identity => new Quaternion(1, 0, 0, 0);
 
         /// <summary>
+        /// オイラー角からクォータニオンを取得します
+        /// </summary>
+        /// <param name="euler"></param>
+        /// <returns></returns>
+        public static Quaternion Euler(Vector3F euler)
+        {
+            var radian = new Vector3F(MathHelper.DegreeToRadian(euler.X), MathHelper.DegreeToRadian(euler.Y), MathHelper.DegreeToRadian(euler.Z));
+
+            var cX = MathF.Cos(radian.X / 2);
+            var sX = MathF.Sin(radian.X / 2);
+
+            var cY = MathF.Cos(radian.Y / 2);
+            var sY = MathF.Sin(radian.Y / 2);
+
+            var cZ = MathF.Cos(radian.Z / 2);
+            var sZ = MathF.Sin(radian.Z / 2);
+
+            var qX = new Quaternion(cX, sX, 0, 0);
+            var qY = new Quaternion(cY, 0, sY, 0);
+            var qZ = new Quaternion(cZ, 0, 0, sZ);
+
+            return qY * qX * qZ;
+        }
+
+        /// <summary>
         /// W成分
         /// </summary>
         [MarshalAs(UnmanagedType.R4)]
@@ -59,30 +84,19 @@ namespace Altseed2
         /// </summary>
         public Vector3F EulerAngles
         {
-            get => new Vector3F(
-                MathHelper.RadianToDegree(MathF.Atan(2 * (W * X + Y * Z) / (W * W - X * X - Y * Y + Z * Z))),
-                MathHelper.RadianToDegree(MathF.Asin(2 * (W * Y + X * Z))),
-                MathHelper.RadianToDegree(MathF.Atan(2 * (W * Z + X * Y) / (W * W + X * X - Y * Y - Z * Z))));
+            get
+            {
+                var mat = Matrix44F.GetQuaternion(this);
+                return MathHelper.MatrixToEuler(mat) * MathHelper.RadianToDegree(1f);
+            }
 
             set
             {
-                var radian = new Vector3F(MathHelper.DegreeToRadian(value.X), MathHelper.DegreeToRadian(value.Y), MathHelper.DegreeToRadian(value.Z));
-
-                var cosRoll = MathF.Cos(radian.X / 2.0f);
-                var sinRoll = MathF.Sin(radian.X / 2.0f);
-                var cosPitch = MathF.Cos(radian.Y / 2.0f);
-                var sinPitch = MathF.Sin(radian.Y / 2.0f);
-                var cosYaw = MathF.Cos(radian.Z / 2.0f);
-                var sinYaw = MathF.Sin(radian.Z / 2.0f);
-
-                W = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw;
-                X = sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw;
-                Y = cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw;
-                Z = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw;
+                this = Euler(value);
             }
         }
 
-        readonly Vector3F ImaginaryPart => new Vector3F(X, Y, X);
+        readonly Vector3F ImaginaryPart => new Vector3F(X, Y, Z);
 
 
         #region Equivalence
@@ -141,10 +155,10 @@ namespace Altseed2
         /// <returns>積算結果</returns>
         public static Quaternion operator *(Quaternion q1, Quaternion q2)
         {
-            var imaginary = q1.W * q2.ImaginaryPart + q2.W * q1.ImaginaryPart + Vector3F.Cross(q1.ImaginaryPart, q2.ImaginaryPart);
-            return new Quaternion(
-                q1.W * q2.W - Vector3F.Dot(q1.ImaginaryPart, q2.ImaginaryPart),
-                imaginary.X, imaginary.Y, imaginary.Z);
+            return new Quaternion(q1.W * q2.W - q1.X * q2.X - q1.Y * q2.Y - q1.Z * q2.Z,
+                                  q1.W * q2.X + q1.X * q2.W + q1.Y * q2.Z - q1.Z * q2.Y,
+                                  q1.W * q2.Y + q1.Y * q2.W + q1.Z * q2.X - q1.X * q2.Z,
+                                  q1.W * q2.Z + q1.Z * q2.W + q1.X * q2.Y - q1.Y * q2.X);
         }
 
         #endregion

@@ -60,7 +60,7 @@ namespace Altseed2.Test
             sourceVector.Length = newLength;
             TestValue(newLength, sourceVector.Length);
         }
-        
+
         [TestCase(5f, 5f, 2f, 10f)]
         [TestCase(5f, 5f, 2f, 0f)]
         [TestCase(0f, 0f, 0f, 12f)]
@@ -70,7 +70,7 @@ namespace Altseed2.Test
             sourceVector.Length = newLength;
             TestValue(newLength, sourceVector.Length);
         }
-        
+
         [TestCase(5f, 5f, 2f, 2f, 10f)]
         [TestCase(5f, 5f, 2f, 2f, 0f)]
         [TestCase(0f, 0f, 0f, 0f, 12f)]
@@ -80,14 +80,43 @@ namespace Altseed2.Test
             sourceVector.Length = newLength;
             TestValue(newLength, sourceVector.Length);
         }
-        
+
+
+        [TestCase(45, 0, 0)]
+        [TestCase(45, 60, 0)]
+        [TestCase(25, 0, 130)]
+        public void QuaternionEuler(float x, float y, float z)
+        {
+            var euler = new Vector3F(x, y, z);
+            var q = Quaternion.Euler(euler);
+            TestValue(euler, q.EulerAngles);
+        }
+
+
+        [TestCase(45, 0, 0)]
+        [TestCase(45, 60, 0)]
+        [TestCase(45, -125, 0)]
+        public void QuaternionRotate(float x, float y, float z)
+        {
+            var euler = new Vector3F(x, y, z);
+            var q = Quaternion.Euler(euler);
+            var qmat = Matrix44F.GetQuaternion(q);
+
+            var mat = (Matrix44F.GetRotationX(MathHelper.DegreeToRadian(-euler.X)) *
+                Matrix44F.GetRotationY(MathHelper.DegreeToRadian(-euler.Y)) *
+                Matrix44F.GetRotationZ(MathHelper.DegreeToRadian(-euler.Z))).Transposed;
+
+            TestValue(mat, qmat);
+        }
+
+
         public static void TestValue(float left, float right)
         {
             if (float.IsNaN(left) || float.IsNaN(right))
             {
                 throw new AssertionException($"left: {left}\nright: {right}");
             }
-            
+
             if (MathF.Abs(left - right) >= MathHelper.MatrixError) throw new AssertionException($"left: {left}\nright: {right}");
         }
         public static void TestValue(Vector2F left, Vector2F right)

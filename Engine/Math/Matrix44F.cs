@@ -264,7 +264,7 @@ namespace Altseed2
         /// <summary>
         /// 射影行列(左手系)を取得します。
         /// </summary>
-        /// <param name="ovY">Y方向への視野角(度数法)</param>
+        /// <param name="ovY">Y方向への視野角(弧度法)</param>
         /// <param name="aspect">画面のアスペクト比</param>
         /// <param name="zn">最近距離</param>
         /// <param name="zf">最遠距離</param>
@@ -351,13 +351,13 @@ namespace Altseed2
             var wz = quaternion.W * quaternion.Z;
 
             result.Values[0 * 4 + 0] = 1.0f - 2.0f * (yy + zz);
-            result.Values[0 * 4 + 1] = 2.0f * (xy + wz);
-            result.Values[0 * 4 + 2] = 2.0f * (xz - wy);
-            result.Values[1 * 4 + 0] = 2.0f * (xy - wz);
+            result.Values[0 * 4 + 1] = 2.0f * (xy - wz);
+            result.Values[0 * 4 + 2] = 2.0f * (xz + wy);
+            result.Values[1 * 4 + 0] = 2.0f * (xy + wz);
             result.Values[1 * 4 + 1] = 1.0f - 2.0f * (xx + zz);
-            result.Values[1 * 4 + 2] = 2.0f * (yz + wx);
-            result.Values[2 * 4 + 0] = 2.0f * (xz + wy);
-            result.Values[2 * 4 + 1] = 2.0f * (yz - wx);
+            result.Values[1 * 4 + 2] = 2.0f * (yz - wx);
+            result.Values[2 * 4 + 0] = 2.0f * (xz - wy);
+            result.Values[2 * 4 + 1] = 2.0f * (yz + wx);
             result.Values[2 * 4 + 2] = 1.0f - 2.0f * (xx + yy);
 
             return result;

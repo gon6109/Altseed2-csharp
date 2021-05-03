@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Altseed2
 {
@@ -12,7 +13,7 @@ namespace Altseed2
         /// 行列で使用
         /// 誤差
         /// </summary>
-        internal const float MatrixError = 0.00001f;
+        internal const float MatrixError = 0.0001f;
 
         /// <summary>
         /// 指定した値を決められた範囲に丸めます。
@@ -301,6 +302,52 @@ namespace Altseed2
             scale = new Vector3F(sx, sy, sz);
             transform = Matrix44F.GetTranslation3D(-absolutePosition) * transform;
             rotation = transform * Matrix44F.GetScale3D(new Vector3F(sx == 0 ? 1f : (1f / sx), sy == 0 ? 1f : (1f / sy), sz == 0 ? 1f : (1f / sz)));
+        }
+
+        /// <summary>
+        /// 回転行列からオイラー角を取得します．
+        /// </summary>
+        /// <param name="m">回転行列</param>
+        /// <returns>オイラー角</returns>
+        public static Vector3F MatrixToEuler(Matrix44F m)
+        {
+            Vector3F v = new Vector3F();
+            if (m[1, 2] < 1)
+            {
+                if (m[1, 2] > -1)
+                {
+                    v.X = MathF.Asin(-m[1, 2]);
+                    v.Y = MathF.Atan2(m[0, 2], m[2, 2]);
+                    v.Z = MathF.Atan2(m[1, 0], m[1, 1]);
+                }
+                else
+                {
+                    v.X = MathF.PI * 0.5f;
+                    v.Y = MathF.Atan2(m[0, 1], m[0, 0]);
+                    v.Z = 0;
+                }
+            }
+            else
+            {
+                v.X = -MathF.PI * 0.5f;
+                v.Y = MathF.Atan2(-m[0, 1], m[0, 0]);
+                v.Z = 0;
+            }
+
+            var array = new float[] { v.X, v.Y, v.Z };
+            for (int i = 0; i < 3; i++)
+            {
+                if (array[i] < 0)
+                {
+                    array[i] += 2 * MathF.PI;
+                }
+                else if (array[i] > 2 * MathF.PI)
+                {
+                    array[i] -= 2 * MathF.PI;
+                }
+            }
+
+            return new Vector3F(array[0], array[1], array[2]);
         }
     }
 }

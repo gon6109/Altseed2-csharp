@@ -217,7 +217,7 @@ namespace Altseed2
             result.Values[0 * 4 + 3] = -Vector3F.Dot(R, eye);
             result.Values[1 * 4 + 3] = -Vector3F.Dot(U, eye);
             result.Values[2 * 4 + 3] = -Vector3F.Dot(F, eye);
-            result.Values[3 * 4 + 3] = 0.0f;
+            result.Values[3 * 4 + 3] = 1.0f;
 
             return result;
         }

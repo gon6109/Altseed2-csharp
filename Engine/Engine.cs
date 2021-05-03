@@ -29,7 +29,9 @@ namespace Altseed2
         internal static CameraNodeCollection _CameraNodes;
         internal static Camera3DNodeCollection _Camera3DNodes;
         internal static RenderedCamera _DefaultCamera;
+        internal static RenderedCamera3D _DefaultCamera3D;
         internal static DrawnCollection _DrawnCollection;
+        internal static Drawn3DCollection _Drawn3DCollection;
 
         internal static RenderTextureCache _RenderTextureCache;
         internal static RenderTexture _PostEffectBuffer; // TODO: 渡し方をうまくやる。
@@ -57,13 +59,14 @@ namespace Altseed2
                 if (_ClearColor == value) return;
                 _ClearColor = value;
 
-                if (_DefaultCamera is null)
+                if (_DefaultCamera is null || _DefaultCamera3D is null)
                 {
                     Log.Warn(LogCategory.Engine, "Graphics機能が初期化されていません。");
                     return;
                 }
 
-                _DefaultCamera.RenderPassParameter = new RenderPassParameter(value, true, true);
+                _DefaultCamera.RenderPassParameter = new RenderPassParameter(value, false, false);
+                _DefaultCamera3D.RenderPassParameter = new RenderPassParameter(value, false, false);
             }
         }
         private static Color _ClearColor = new Color(50, 50, 50, 255);
@@ -106,13 +109,20 @@ namespace Altseed2
                 if (_graphics != null)
                 {
                     _DrawnCollection = new DrawnCollection();
+                    _Drawn3DCollection = new Drawn3DCollection();
                     _CameraNodes = new CameraNodeCollection();
                     _Camera3DNodes = new Camera3DNodeCollection();
                     _RenderTextureCache = new RenderTextureCache();
 
                     _DefaultCamera = RenderedCamera.Create();
                     _DefaultCamera.ViewMatrix = Matrix44F.GetTranslation2D(-WindowSize / 2);
-                    _DefaultCamera.RenderPassParameter = new RenderPassParameter(ClearColor, true, true);
+                    _DefaultCamera.RenderPassParameter = new RenderPassParameter(ClearColor, false, false);
+
+                    _DefaultCamera3D = RenderedCamera3D.Create();
+                    _DefaultCamera3D.ViewMatrix =
+                        Matrix44F.GetPerspectiveFovLH(1.05f, (float)WindowSize.X / WindowSize.Y, 0.1f, 5000) *
+                        Matrix44F.GetLookAtLH(new Vector3F(0, 0, -5), new Vector3F(0, 0, 0), new Vector3F(0, 1, 0));
+                    _DefaultCamera3D.RenderPassParameter = new RenderPassParameter(ClearColor, false, false);
 
                     _DrawingRenderedIdsBuffer = new ArrayBuffer<int>();
                     Vector2FBuffer = new ArrayBuffer<Vector2F>(MaxStackalloclLength * 2);
@@ -153,16 +163,17 @@ namespace Altseed2
         /// </summary>
         public static bool Update()
         {
-            if (_CameraNodes != null)
+            if (_CameraNodes != null && _Camera3DNodes != null)
             {
                 var anyCamera = _CameraNodes.Count != 0;
-                return UpdateComponents(!anyCamera, anyCamera);
+                var anyCamera3D = _Camera3DNodes.Count != 0;
+                return UpdateComponents(!anyCamera, anyCamera, !anyCamera3D, anyCamera3D);
             }
 
             return true;
         }
 
-        internal static bool UpdateComponents(bool drawDefaultCameraGroup, bool drawCustomCameraGroup)
+        internal static bool UpdateComponents(bool drawDefaultCameraGroup, bool drawCustomCameraGroup, bool drawDefaultCamera3DGroup, bool drawCustomCamera3DGroup)
         {
             // ノードの更新
             _UpdatedNode?.Update();
@@ -190,14 +201,26 @@ namespace Altseed2
                 DrawCameraGroup(_DefaultCamera, _DrawnCollection.GetDrawns());
             }
 
-            if (drawCustomCameraGroup)
+            if (drawDefaultCamera3DGroup)
             {
-                // 特定のカメラに映りこむノードを描画
-                for (int i = 0; i < MaxCameraGroupCount; i++)
+                DrawCamera3DGroup(_DefaultCamera3D, _Drawn3DCollection.GetDrawns());
+            }
+
+            // 特定のカメラに映りこむノードを描画
+            for (int i = 0; i < MaxCameraGroupCount; i++)
+            {
+                if (drawCustomCameraGroup)
                 {
                     foreach (var camera in _CameraNodes[i])
                     {
                         DrawCameraGroup(camera.RenderedCamera, _DrawnCollection[i]);
+                    }
+                }
+                if (drawCustomCamera3DGroup)
+                {
+                    foreach (var camera in _Camera3DNodes[i])
+                    {
+                        DrawCamera3DGroup(camera.RenderedCamera, _Drawn3DCollection[i]);
                     }
                 }
             }
@@ -288,6 +311,30 @@ namespace Altseed2
             if (requireRender) Renderer.Render();
         }
 
+        internal static void DrawCamera3DGroup(RenderedCamera3D camera, SortedDictionary<int, HashSet<IDrawn3D>> drawns)
+        {
+            Renderer3D.Camera = camera;
+            var requireRender = false;
+
+            foreach (var (_, znodes) in drawns)
+            {
+                foreach (var node in znodes)
+                {
+                    if (node is IDrawn3D cdrawn)
+                    {
+                        if (!cdrawn.IsDrawnActually) continue;
+                        // NOTE: WhereIterator を生成させないために foreach (var node in nodes.Where(n => n.IsDrawnActually)) などとしない
+
+                        node.Draw();
+                        requireRender = true;
+                    }
+                    else throw new InvalidOperationException();
+                }
+            }
+
+            if (requireRender) Renderer3D.Render();
+        }
+
         /// <summary>
         /// エンジンを終了します。
         /// </summary>
@@ -320,12 +367,14 @@ namespace Altseed2
             _window = null;
             _graphics = null;
             _renderer = null;
+            _renderer3D = null;
             _cullingSystem = null;
             _tool = null;
             _sound = null;
             _RootNode = null;
             _UpdatedNode = null;
             _DrawnCollection = null;
+            _Drawn3DCollection = null;
             _CameraNodes = null;
             _DefaultCamera = null;
             _profiler = null;
@@ -522,6 +571,30 @@ namespace Altseed2
             _DrawnCollection.UpdateZOrder(node, old);
         }
 
+        internal static void RegisterDrawn3D(IDrawn3D node)
+        {
+            if (_Drawn3DCollection is null) throw new InvalidOperationException("Graphics機能が初期化されていません。");
+            _Drawn3DCollection.Register(node);
+        }
+
+        internal static void UnregisterDrawn3D(IDrawn3D node)
+        {
+            if (_Drawn3DCollection is null) throw new InvalidOperationException("Graphics機能が初期化されていません。");
+            _Drawn3DCollection.Unregister(node);
+        }
+
+        internal static void UpdateDrawnCamera3DGroup(IDrawn3D node, ulong old)
+        {
+            if (_Drawn3DCollection is null) throw new InvalidOperationException("Graphics機能が初期化されていません。");
+            _Drawn3DCollection.UpdateCameraGroup(node, old);
+        }
+
+        internal static void UpdateDrawn3DZOrder(IDrawn3D node, int old)
+        {
+            if (_Drawn3DCollection is null) throw new InvalidOperationException("Graphics機能が初期化されていません。");
+            _Drawn3DCollection.UpdateZOrder(node, old);
+        }
+
         #endregion
 
         #region CameraNodeCollection
@@ -583,6 +656,9 @@ namespace Altseed2
             {
                 Window.Size = value;
                 _DefaultCamera.ViewMatrix = Matrix44F.GetTranslation2D(-value / 2);
+                _DefaultCamera3D.ViewMatrix =
+                    Matrix44F.GetPerspectiveFovLH(1.05f, (float)value.X / value.Y, 0.1f, 5000) *
+                    Matrix44F.GetLookAtLH(new Vector3F(0, 0, -5), new Vector3F(0, 0, 0), new Vector3F(0, 1, 0));
             }
         }
 

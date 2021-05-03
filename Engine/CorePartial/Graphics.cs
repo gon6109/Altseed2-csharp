@@ -267,10 +267,10 @@ namespace Altseed2
     {
         public Color ClearColor;
 
-        [MarshalAs(UnmanagedType.Bool)]
+        [MarshalAs(UnmanagedType.U1)]
         public bool IsColorCleared;
 
-        [MarshalAs(UnmanagedType.Bool)]
+        [MarshalAs(UnmanagedType.U1)]
         public bool IsDepthCleared;
 
         /// <summary>
@@ -328,7 +328,7 @@ namespace Altseed2
     [StructLayout(LayoutKind.Sequential)]
     public struct AlphaBlend : IEquatable<AlphaBlend>
     {
-        [MarshalAs(UnmanagedType.Bool)]
+        [MarshalAs(UnmanagedType.U1)]
         public bool IsBlendEnabled;
         public BlendFunction BlendSrcFunc;
         public BlendFunction BlendDstFunc;

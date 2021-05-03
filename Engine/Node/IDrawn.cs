@@ -50,8 +50,21 @@ namespace Altseed2
     /// <summary>
     /// 描画ノードインターフェース
     /// </summary>
-    public interface I3DDrawn: IDrawn
+    public interface IDrawn3D
     {
+        internal void Draw();
+
+        /// <summary>
+        /// カメラグループを取得または設定します。
+        /// </summary>
+        ulong CameraGroup { get; set; }
+
+        /// <summary>
+        /// 描画時の重ね順を取得または設定します。
+        /// </summary>
+        int ZOrder { get; set; }
+
+
         internal Rendered3D Rendered { get; }
 
         /// <summary>
@@ -84,6 +97,21 @@ namespace Altseed2
             {
                 if (child is T d)
                     d.UpdateIsDrawnActuallyOfDescendants();
+            }
+        }
+
+        /// <summary>
+        /// 自身と子孫ノードの IsDrawnActually プロパティを更新します。
+        /// </summary>
+        internal static void UpdateIsDrawn3DActuallyOfDescendants<T>(this T node)
+            where T : Node, IDrawn3D
+        {
+            node.IsDrawnActually = node.IsDrawn && (node.GetAncestorSpecificNode<T>()?.IsDrawnActually ?? true);
+
+            foreach (var child in node.Children)
+            {
+                if (child is T d)
+                    d.UpdateIsDrawn3DActuallyOfDescendants();
             }
         }
     }

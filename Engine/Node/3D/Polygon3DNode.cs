@@ -8,7 +8,7 @@ namespace Altseed2
     /// 図形を描画するノードを表します。
     /// </summary>
     [Serializable]
-    public class Polygon3DNode : Transform3DNode, I3DDrawn
+    public class Polygon3DNode : Transform3DNode, IDrawn3D
     {
         protected private readonly RenderedPolygon3D _RenderedPolygon;
 
@@ -28,9 +28,9 @@ namespace Altseed2
             _RenderedPolygon = RenderedPolygon3D.Create();
         }
 
-        #region IDrawn
+        #region I3DDrawn
 
-        void IDrawn.Draw()
+        void IDrawn3D.Draw()
         {
             if (_IsValid) Engine.Renderer3D.DrawPolygon(_RenderedPolygon);
         }
@@ -53,7 +53,7 @@ namespace Altseed2
                 _CameraGroup = value;
 
                 if (IsRegistered)
-                    Engine.UpdateDrawnCameraGroup(this, old);
+                    Engine.UpdateDrawnCamera3DGroup(this, old);
             }
         }
         private ulong _CameraGroup;
@@ -72,7 +72,7 @@ namespace Altseed2
                 _ZOrder = value;
 
                 if (IsRegistered)
-                    Engine.UpdateDrawnZOrder(this, old);
+                    Engine.UpdateDrawn3DZOrder(this, old);
             }
         }
         private int _ZOrder;
@@ -86,8 +86,7 @@ namespace Altseed2
             {
                 if (_IsDrawn == value) return;
                 _IsDrawn = value;
-                this.UpdateIsDrawnActuallyOfDescendants();
-
+                this.UpdateIsDrawn3DActuallyOfDescendants();
             }
         }
         private bool _IsDrawn = true;
@@ -95,8 +94,10 @@ namespace Altseed2
         /// <summary>
         /// 先祖の<see cref="IsDrawn"/>を考慮して、このノードを描画するかどうかを取得します。
         /// </summary>
-        public bool IsDrawnActually => (this as ICullableDrawn).IsDrawnActually;
-        bool I3DDrawn.IsDrawnActually { get; set; } = true;
+        public bool IsDrawnActually => (this as IDrawn3D).IsDrawnActually;
+        bool IDrawn3D.IsDrawnActually { get; set; } = true;
+
+        Rendered3D IDrawn3D.Rendered => _RenderedPolygon;
 
         #endregion
 
@@ -105,20 +106,20 @@ namespace Altseed2
         internal override void Registered()
         {
             base.Registered();
-            Engine.RegisterDrawn(this);
+            Engine.RegisterDrawn3D(this);
         }
 
         internal override void Unregistered()
         {
             base.Unregistered();
-            Engine.UnregisterDrawn(this);
+            Engine.UnregisterDrawn3D(this);
         }
 
         /// <inheritdoc/>
         public override void FlushQueue()
         {
             base.FlushQueue();
-            this.UpdateIsDrawnActuallyOfDescendants();
+            this.UpdateIsDrawn3DActuallyOfDescendants();
         }
 
         #endregion
@@ -191,7 +192,7 @@ namespace Altseed2
             private protected set
             {
                 base.InheritedTransform = value;
-                AbsoluteTransform = value * Matrix44F.GetTranslation2D(-CenterPosition);
+                AbsoluteTransform = value * Matrix44F.GetTranslation3D(-CenterPosition);
                 _RenderedPolygon.Transform = AbsoluteTransform;
             }
         }
@@ -292,49 +293,6 @@ namespace Altseed2
         {
             _RenderedPolygon.Vertexes.FromEnumerable(vertexes);
             SetVertexes(_RenderedPolygon.Vertexes, resetIB);
-        }
-
-        /// <summary>
-        /// 座標をもとに頂点情報を設定します。
-        /// </summary>
-        /// <param name="vertexes">設定する各頂点の座標を格納する<see cref="Span{Vector2F}" /></param>
-        /// <param name="color">各頂点に設定する色</param>
-        /// <param name="resetIB"><see cref="Buffers"/>を自動計算したものに設定するかどうか</param>
-        public void SetVertexes(ReadOnlySpan<Vector2F> vertexes, Color color, bool resetIB = true)
-        {
-            Engine.Vector2FArrayCache.FromSpan(vertexes);
-            SetVertexesFromPositions(Engine.Vector2FArrayCache, color, resetIB);
-        }
-
-        /// <summary>
-        /// 座標をもとに頂点情報を設定します。
-        /// </summary>
-        /// <param name="vertexes">設定する各頂点の座標を格納する<see cref="IEnumerable{Vector2F}" /></param>
-        /// <param name="color">各頂点に設定する色</param>
-        /// <param name="resetIB"><see cref="Buffers"/>を自動計算したものに設定するかどうか</param>
-        /// <exception cref="ArgumentNullException"><paramref name="vertexes"/>がnullです。</exception>
-        public void SetVertexes(IEnumerable<Vector2F> vertexes, Color color, bool resetIB = true)
-        {
-            Engine.Vector2FArrayCache.FromEnumerable(vertexes);
-            SetVertexesFromPositions(Engine.Vector2FArrayCache, color, resetIB);
-        }
-
-        internal void SetVertexesFromPositions(Vector2FArray array, Color color, bool resetIB)
-        {
-            _RenderedPolygon.CreateVertexesByVector2F(array);
-            _RenderedPolygon.OverwriteVertexesColor(color);
-            _IsValid = Validate(array);
-            _RequireCalcTransform = true;
-            if (resetIB) SetDefaultIndexBuffer();
-        }
-
-        /// <summary>
-        /// 各頂点に指定した色を設定します。
-        /// </summary>
-        /// <param name="color">設定する色</param>
-        public void OverwriteVertexColor(Color color)
-        {
-            _RenderedPolygon.OverwriteVertexesColor(color);
         }
 
         /// <summary>
@@ -461,5 +419,15 @@ namespace Altseed2
         /// <see cref="Polygon3DNode"/>と同様の方法でインデックスバッファの設定を行います。
         /// </summary>
         public void SetDefaultIndexBuffer() => _RenderedPolygon.SetDefaultIndexBuffer();
+
+        /// <inheritdoc/>
+        public sealed override Vector3F ContentSize
+        {
+            get
+            {
+                MathHelper.GetMinMaxVector3F(out var min, out var max, _RenderedPolygon.Vertexes);
+                return max - min;
+            }
+        }
     }
 }

@@ -725,5 +725,48 @@ float4 main(PS_INPUT input) : SV_TARGET
 
             tc.End();
         }
+
+        [Test, Apartment(ApartmentState.STA)]
+        public void Polygon3DNode()
+        {
+            var tc = new TestCore();
+            tc.Init();
+
+            Polygon3DNode node = new Polygon3DNode();
+            Engine.AddNode(node);
+
+            Vertex[] vertexes = new Vertex[4];
+            vertexes[0] = new Vertex() { Position = new Vector3F(0, 1, 0), Color = new Color(255, 255, 255) };
+            vertexes[1] = new Vertex() { Position = new Vector3F(0, 0, 1), Color = new Color(255, 0, 0) };
+            vertexes[2] = new Vertex() { Position = new Vector3F(1.73f * 0.5f, 0, -0.5f), Color = new Color(0, 0, 255) };
+            vertexes[3] = new Vertex() { Position = new Vector3F(-1.73f * 0.5f, 0, -0.5f), Color = new Color(0, 255, 0) };
+
+            node.SetVertexes(vertexes.AsSpan());
+
+            node.Buffers = new int[]
+            {
+                0, 1, 2,
+                0, 2, 3,
+                0, 3, 1,
+                1, 2, 3
+            };
+            //node.Position = new Vector3F(0, 0, -5);
+
+            foreach (var current in node.Buffers) System.Diagnostics.Debug.WriteLine(current);
+            foreach (var current in node.Vertexes) System.Diagnostics.Debug.WriteLine(current.Position);
+            float r = 0;
+            tc.Duration = 1000;
+            tc.LoopBody(c =>
+            {
+                if (c % 60 == 0)
+                    r += 45;
+
+                var q = node.Quaternion;
+                q.EulerAngles = new Vector3F(0, r, 0);
+                node.Quaternion = q;
+            }, null);
+
+            tc.End();
+        }
     }
 }

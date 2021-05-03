@@ -199,6 +199,76 @@ namespace Altseed2
         }
 
         /// <summary>
+        /// 指定した頂点を全て含む長方形のうち左上と右下の座標を割り出します。
+        /// </summary>
+        /// <param name="min">左上の座標</param>
+        /// <param name="max">右下の座標</param>
+        /// <param name="positions">計算する座標</param>
+        /// <exception cref="ArgumentNullException"><paramref name="positions"/>がnull</exception>
+        internal static void GetMinMaxVector3F(out Vector3F min, out Vector3F max, VertexArray positions)
+        {
+            var min_x = float.MaxValue;
+            var min_y = float.MaxValue;
+            var min_z = float.MaxValue;
+            var max_x = float.MinValue;
+            var max_y = float.MinValue;
+            var max_z = float.MinValue;
+            if (positions == null) throw new ArgumentNullException(nameof(positions), "引数がnullです");
+            var count = positions.Count;
+            if (count == 0)
+            {
+                min = max = default;
+                return;
+            }
+            for (int i = 0; i < count; i++)
+            {
+                var current = positions[i].Position;
+                if (min_x > current.X) min_x = current.X;
+                if (min_y > current.Y) min_y = current.Y;
+                if (min_z > current.Z) min_z = current.Z;
+                if (max_x < current.X) max_x = current.X;
+                if (max_y < current.Y) max_y = current.Y;
+                if (max_z < current.Z) max_z = current.Z;
+            }
+            min = new Vector3F(min_x, min_y, min_z);
+            max = new Vector3F(max_x, max_y, max_z);
+        }
+
+        /// <summary>
+        /// 指定した頂点を全て含む長方形のうち左上と右下の座標を割り出します。
+        /// </summary>
+        /// <param name="min">左上の座標</param>
+        /// <param name="max">右下の座標</param>
+        /// <param name="positions">計算する座標</param>
+        /// <exception cref="ArgumentNullException"><paramref name="positions"/>がnull</exception>
+        internal static void GetMinMaxVector3F(out Vector3F min, out Vector3F max, params Vector3F[] positions)
+        {
+            var min_x = float.MaxValue;
+            var min_y = float.MaxValue;
+            var min_z = float.MaxValue;
+            var max_x = float.MinValue;
+            var max_y = float.MinValue;
+            var max_z = float.MinValue;
+            if (positions == null) throw new ArgumentNullException(nameof(positions), "引数がnullです");
+            if (positions.Length == 0)
+            {
+                min = max = default;
+                return;
+            }
+            foreach (var current in positions)
+            {
+                if (min_x > current.X) min_x = current.X;
+                if (min_y > current.Y) min_y = current.Y;
+                if (min_z > current.Z) min_z = current.Z;
+                if (max_x < current.X) max_x = current.X;
+                if (max_y < current.Y) max_y = current.Y;
+                if (max_z < current.Z) max_z = current.Z;
+            }
+            min = new Vector3F(min_x, min_y, min_z);
+            max = new Vector3F(max_x, max_y, max_z);
+        }
+
+        /// <summary>
         /// <see cref="Matrix44F"/>から2次元座標，拡大率，角度を算出します。
         /// </summary>
         /// <param name="transform">計算元となる4x4行列</param>

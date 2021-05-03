@@ -120,6 +120,123 @@ namespace Altseed2
         private bool HasBit(ulong value, uint mask) => (value & mask) != 0;
     }
 
+    internal class Drawn3DCollection
+    {
+        private SortedDictionary<int, HashSet<IDrawn3D>> _Drawns;
+        private SortedDictionary<int, SortedDictionary<int, HashSet<IDrawn3D>>> _Sorted;
+
+        internal Drawn3DCollection()
+        {
+            _Drawns = new SortedDictionary<int, HashSet<IDrawn3D>>();
+            _Sorted = new SortedDictionary<int, SortedDictionary<int, HashSet<IDrawn3D>>>();
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+                _Sorted[i] = new SortedDictionary<int, HashSet<IDrawn3D>>();
+        }
+
+        internal void Register(IDrawn3D node)
+        {
+            if (node == null) throw new ArgumentNullException(nameof(node));
+
+            {
+                if (!_Drawns.TryGetValue(node.ZOrder, out var set))
+                    set = _Drawns[node.ZOrder] = new HashSet<IDrawn3D>();
+
+                set.Add(node);
+            }
+
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+            {
+                var mask = 1u << i;
+                if (!HasBit(node.CameraGroup, mask)) continue;
+
+                var group = _Sorted[i];
+
+                if (!group.TryGetValue(node.ZOrder, out var set))
+                    set = group[node.ZOrder] = new HashSet<IDrawn3D>();
+
+                set.Add(node);
+            }
+        }
+
+        internal void Unregister(IDrawn3D node)
+        {
+            if (node == null) throw new ArgumentNullException(nameof(node));
+
+            _Drawns[node.ZOrder].Remove(node);
+
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+            {
+                var mask = 1u << i;
+                if (!HasBit(node.CameraGroup, mask)) continue;
+
+                var group = _Sorted[i];
+                group[node.ZOrder].Remove(node);
+            }
+        }
+
+        internal void UpdateCameraGroup(IDrawn3D node, ulong old)
+        {
+            if (node == null) throw new ArgumentNullException(nameof(node));
+
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+            {
+                var mask = 1u << i;
+
+                if (HasBit(old, mask) && !HasBit(node.CameraGroup, mask))
+                {
+                    // 削除
+                    _Sorted[i][node.ZOrder].Remove(node);
+                }
+
+                if (!HasBit(old, mask) && HasBit(node.CameraGroup, mask))
+                {
+                    // 追加
+                    var group = _Sorted[i];
+
+                    if (!group.TryGetValue(node.ZOrder, out var set))
+                        set = group[node.ZOrder] = new HashSet<IDrawn3D>();
+
+                    set.Add(node);
+                }
+            }
+        }
+
+        internal void UpdateZOrder(IDrawn3D node, int old)
+        {
+            if (node == null) throw new ArgumentNullException(nameof(node));
+
+            {
+                _Drawns[old].Remove(node);
+
+                if (!_Drawns.TryGetValue(node.ZOrder, out var set))
+                    set = _Drawns[node.ZOrder] = new HashSet<IDrawn3D>();
+
+                set.Add(node);
+            }
+
+            for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
+            {
+                var mask = 1u << i;
+
+                if (!HasBit(node.CameraGroup, mask)) continue;
+
+                var group = _Sorted[i];
+
+                group[old].Remove(node);
+
+                if (!group.TryGetValue(node.ZOrder, out var set))
+                    set = group[node.ZOrder] = new HashSet<IDrawn3D>();
+
+                set.Add(node);
+            }
+        }
+
+        internal SortedDictionary<int, HashSet<IDrawn3D>> GetDrawns() => _Drawns;
+        internal SortedDictionary<int, HashSet<IDrawn3D>> this[int cameraGroup] => _Sorted[cameraGroup];
+
+        private bool HasBit(ulong value, uint mask) => (value & mask) != 0;
+    }
+
     internal class CameraNodeCollection
     {
         private List<CameraNode>[] _Lists;

@@ -183,7 +183,7 @@ namespace Altseed2
         {
             if (UseCaptionAsMaskTexture && MaskTexture == null)
             {
-                var maskTexture = RenderTexture.Create(src.Size, src.Format);
+                var maskTexture = RenderTexture.Create(src.Size, src.Format, false);
                 Engine.Graphics.CommandList.CopyTexture(src, maskTexture);
                 MaskTexture = maskTexture;
             }

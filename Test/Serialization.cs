@@ -300,7 +300,7 @@ namespace Altseed2.Test
             tc.Init();
 
             var size = new Vector2I(100, 100);
-            var texture1 = Altseed2.RenderTexture.Create(size, TextureFormat.R8G8B8A8_UNORM);
+            var texture1 = Altseed2.RenderTexture.Create(size, TextureFormat.R8G8B8A8_UNORM, false);
 
             Assert.NotNull(texture1);
 
@@ -626,7 +626,7 @@ namespace Altseed2.Test
             var tc = new TestCore();
             tc.Init();
 
-            var texture = Altseed2.RenderTexture.Create(new Vector2I(100, 100), TextureFormat.R8G8B8A8_UNORM);
+            var texture = Altseed2.RenderTexture.Create(new Vector2I(100, 100), TextureFormat.R8G8B8A8_UNORM, false);
 
             Assert.NotNull(texture);
 

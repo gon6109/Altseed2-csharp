@@ -80,7 +80,7 @@ namespace Altseed2
             }
             else
             {
-                var res = RenderTexture.Create(size, format);
+                var res = RenderTexture.Create(size, format, false);
                 cache.Add(key, new CacheValue { Life = 5, Stored = res });
                 return res;
             }

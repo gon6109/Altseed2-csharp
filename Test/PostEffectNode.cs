@@ -231,7 +231,7 @@ float4 tex = mainTex.Sample(mainSamp, float2(x, input.UV1.y));
                 CameraGroup = cameraGroup2,
             });
 
-            var target = RenderTexture.Create((new Vector2F(0.5f, 1.0f) * Engine.Window.Size.To2F()).To2I(), TextureFormat.R8G8B8A8_UNORM);
+            var target = RenderTexture.Create((new Vector2F(0.5f, 1.0f) * Engine.Window.Size.To2F()).To2I(), TextureFormat.R8G8B8A8_UNORM, false);
 
             Engine.AddNode(new CameraNode() { Group = cameraGroup2, TargetTexture = target, IsColorCleared = true, ClearColor = new Color(80, 80, 80) });
 

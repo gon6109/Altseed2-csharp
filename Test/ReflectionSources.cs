@@ -324,7 +324,7 @@ namespace Altseed2.Test
                 // Altseed2.RenderedCamera
                 var renderedCamera_Value = RenderedCamera.Create();
                 renderedCamera_Value.RenderPassParameter = new RenderPassParameter(new Color(255, 100, 100), true, true);
-                renderedCamera_Value.TargetTexture = RenderTexture.Create(new Vector2I(300, 300), TextureFormat.R32G32B32A32_FLOAT);
+                renderedCamera_Value.TargetTexture = RenderTexture.Create(new Vector2I(300, 300), TextureFormat.R32G32B32A32_FLOAT, false);
                 renderedCamera_Value.ViewMatrix = MathHelper.CalcTransform(new Vector2F(30f, 30f), MathHelper.DegreeToRadian(30f), new Vector2F(3f, 2f));
                 var renderedCamera = ReflectionInfo.Create(renderedCamera_Value);
                 renderedCamera.PropertyInfos = new[]
@@ -475,7 +475,7 @@ namespace Altseed2.Test
                 result.Add(texture2D.Type, texture2D);
 
                 // Altseed2.RenderTexture
-                var renderTexture_Value = RenderTexture.Create(new Vector2I(300, 300), TextureFormat.R32G32B32A32_FLOAT);
+                var renderTexture_Value = RenderTexture.Create(new Vector2I(300, 300), TextureFormat.R32G32B32A32_FLOAT, false);
                 renderTexture_Value.FilterType = TextureFilter.Linear;
                 renderTexture_Value.WrapMode = TextureWrapMode.Clamp;
                 var renderTexture = ReflectionInfo.Create(renderTexture_Value);
@@ -1054,7 +1054,7 @@ namespace Altseed2.Test
                     IsColorCleared = true,
                     Position = new Vector2F(30f, 30f),
                     Scale = new Vector2F(3f, 2f),
-                    TargetTexture = RenderTexture.Create(new Vector2I(400, 400), TextureFormat.R32G32B32A32_FLOAT),
+                    TargetTexture = RenderTexture.Create(new Vector2I(400, 400), TextureFormat.R32G32B32A32_FLOAT, false),
                 });
                 cameraNode.PropertyInfos = new[]
                 {

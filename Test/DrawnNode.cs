@@ -47,6 +47,71 @@ namespace Altseed2.Test
         }
 
         [Test, Apartment(ApartmentState.STA)]
+        public void Sprite3DNode()
+        {
+            var tc = new TestCore();
+            tc.Init();
+
+            var texture = Texture2D.Load(@"TestData/IO/AltseedPink.png");
+            Assert.NotNull(texture);
+
+            var node = new Sprite3DNode();
+            node.Texture = texture;
+            //node.Src = new RectF(new Vector2F(100, 100), new Vector2F(200, 200));
+            //node.Pivot = new Vector2F(0.5f, 0.5f);
+            //node.AdjustSize();
+            node.Quaternion = Quaternion.Euler(new Vector3F(0, 45, 45));
+            Engine.AddNode(node);
+
+            tc.LoopBody(c =>
+            {
+                if (Engine.Keyboard.GetKeyState(Key.Right) == ButtonState.Hold) node.Position += new Vector3F(0.15f, 0, 0);
+                if (Engine.Keyboard.GetKeyState(Key.Left) == ButtonState.Hold) node.Position -= new Vector3F(0.15f, 0, 0);
+                if (Engine.Keyboard.GetKeyState(Key.Down) == ButtonState.Hold) node.Position += new Vector3F(0, 0, 0.15f);
+                if (Engine.Keyboard.GetKeyState(Key.Up) == ButtonState.Hold) node.Position -= new Vector3F(0, 0, 0.15f);
+                if (Engine.Keyboard.GetKeyState(Key.B) == ButtonState.Hold) node.Scale += new Vector3F(0.01f, 0.01f, 0);
+                if (Engine.Keyboard.GetKeyState(Key.S) == ButtonState.Hold) node.Scale -= new Vector3F(0.01f, 0.01f, 0);
+                if (Engine.Keyboard.GetKeyState(Key.X) == ButtonState.Hold) node.Src = new RectF(node.Src.X, node.Src.Y, node.Src.Width - 2.0f, node.Src.Height - 2.0f);
+                if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Hold) node.Src = new RectF(node.Src.X, node.Src.Y, node.Src.Width + 2.0f, node.Src.Height + 2.0f);
+                if (Engine.Keyboard.GetKeyState(Key.C) == ButtonState.Hold) node.Src = new RectF(node.Src.X - 2.0f, node.Src.Y - 2.0f, node.Src.Width, node.Src.Height);
+                if (Engine.Keyboard.GetKeyState(Key.V) == ButtonState.Hold) node.Src = new RectF(node.Src.X + 2.0f, node.Src.Y + 2.0f, node.Src.Width, node.Src.Height);
+            }
+            , null);
+
+            tc.End();
+        }
+
+
+        [Test, Apartment(ApartmentState.STA)]
+        public void Text3DNode()
+        {
+            var tc = new TestCore();
+            tc.Init();
+
+            var font = Font.LoadDynamicFont("TestData/Font/mplus-1m-regular.ttf", 64);
+            var font2 = Font.LoadDynamicFont("TestData/Font/GenYoMinJP-Bold.ttf", 64);
+            Assert.NotNull(font);
+            Assert.NotNull(font2);
+            var imageFont = Font.CreateImageFont(font);
+            imageFont.AddImageGlyph('〇', Texture2D.Load(@"TestData/IO/AltseedPink.png"));
+
+            Engine.AddNode(new Text3DNode() { Font = font, FontSize = 80, Text = "Hello, world! こんにちは" });
+            Engine.AddNode(new Text3DNode() { Font = font, FontSize = 80, Text = "色を指定します。", Position = new Vector3F(0.0f, -1.0f, 0.5f), Color = new Color(0, 0, 255) });
+            Engine.AddNode(new Text3DNode() { Font = font2, FontSize = 80, Text = "𠀋 𡈽 𡌛 𡑮 𡢽 𠮟 𡚴 𡸴 𣇄 𣗄 𣜿 𣝣 𣳾", Position = new Vector3F(0.0f, 1.0f, -1.0f) });
+            Engine.AddNode(new Text3DNode() { Font = imageFont, FontSize = 80, Text = "Altseed〇Altseed", Position = new Vector3F(0.0f, 1.0f, 1.0f) });
+            var rotated = new Text3DNode() { Font = font, FontSize = 80, Text = "回転します。", Position = new Vector3F(-2.0f, -2.0f, 0.1f) };
+            Engine.AddNode(rotated);
+
+            tc.LoopBody(c =>
+            {
+                rotated.Quaternion = Quaternion.Euler(rotated.Quaternion.EulerAngles + new Vector3F(0, 1, 1));
+            }
+            , null);
+
+            tc.End();
+        }
+
+        [Test, Apartment(ApartmentState.STA)]
         public void SpriteNodeWithMaterial()
         {
             var tc = new TestCore();

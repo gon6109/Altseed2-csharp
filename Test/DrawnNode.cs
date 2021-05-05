@@ -833,5 +833,28 @@ float4 main(PS_INPUT input) : SV_TARGET
 
             tc.End();
         }
+
+
+        [Test, Apartment(ApartmentState.STA)]
+        public void Model3DBunny()
+        {
+            var tc = new TestCore();
+            tc.Init();
+
+            Polygon3DNode node = Model3D.LoadObjFile(@"TestData/3D/bunny.obj").First().ToPolygon3DNode(new Color(255, 0, 0));
+            Engine.AddNode(node);
+            node.Scale *= 15f;
+            node.Position = new Vector3F(0, -1, 0);
+            tc.Duration = 1000;
+
+            tc.LoopBody(c =>
+            {
+                var q = node.Quaternion;
+                q.EulerAngles = new Vector3F(0, c, 0);
+                node.Quaternion = q;
+            }, null);
+
+            tc.End();
+        }
     }
 }

@@ -14,6 +14,12 @@ namespace Altseed2
         /// 座標
         /// </summary>
         public Vector3F Position;
+
+        /// <summary>
+        /// 法線
+        /// </summary>
+        public Vector3F Normal;
+
         /// <summary>
         /// 色
         /// </summary>
@@ -31,12 +37,14 @@ namespace Altseed2
         /// <see cref="Vertex"/>の新しいインスタンスを生成します。
         /// </summary>
         /// <param name="position">座標</param>
+        /// <param name="normal">法線</param>
         /// <param name="color">色</param>
         /// <param name="uv1">UV1</param>
         /// <param name="uv2">UV2</param>
-        public Vertex(Vector3F position, Color color, Vector2F uv1, Vector2F uv2)
+        public Vertex(Vector3F position, Vector3F normal, Color color, Vector2F uv1, Vector2F uv2)
         {
             Position = position;
+            Normal = normal;
             Color = color;
             UV1 = uv1;
             UV2 = uv2;
@@ -47,7 +55,7 @@ namespace Altseed2
         /// </summary>
         /// <param name="other">等価線を判定する<see cref="Vertex"/>のインスタンス</param>
         /// <returns><paramref name="other"/>との間との等価性が認められたらtrue，それ以外でfalse</returns>
-        public readonly bool Equals(Vertex other) => Position == other.Position && Color == other.Color && UV1 == other.UV1 && UV2 == other.UV2;
+        public readonly bool Equals(Vertex other) => Position == other.Position && Normal == other.Normal && Color == other.Color && UV1 == other.UV1 && UV2 == other.UV2;
 
         /// <summary>
         /// オブジェクトとの等価性を判定します。
@@ -60,7 +68,7 @@ namespace Altseed2
         /// このインスタンスのハッシュコードを返します。
         /// </summary>
         /// <returns>このインスタンスのハッシュコード</returns>
-        public readonly override int GetHashCode() => HashCode.Combine(Position, Color, UV1, UV2);
+        public readonly override int GetHashCode() => HashCode.Combine(Position, Normal, Color, UV1, UV2);
 
         /// <summary>
         /// 二つの<see cref="Vertex"/>の間の等価性を判定します。

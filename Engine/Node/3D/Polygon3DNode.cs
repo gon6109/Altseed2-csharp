@@ -402,7 +402,7 @@ namespace Altseed2
                 var size = max - min;
                 if (size.X == 0) size.X = 1f;
                 if (size.Y == 0) size.Y = 1f;
-                for (int i = 0; i < array.Length; i++) vertexList.Add(new Vertex(new Vector3F(array[i].X, array[i].Y, 0.5f), color, (array[i] - min) / size, default));
+                for (int i = 0; i < array.Length; i++) vertexList.Add(new Vertex(new Vector3F(array[i].X, array[i].Y, 0.5f), default, color, (array[i] - min) / size, default));
                 for (int i = 0; i < array.Length - 2; i++)
                 {
                     bufferList.Add(totalCount);

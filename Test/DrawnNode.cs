@@ -838,17 +838,22 @@ float4 main(PS_INPUT input) : SV_TARGET
         [Test, Apartment(ApartmentState.STA)]
         public void Model3DBunny()
         {
-            var tc = new TestCore();
+            var tc = new TestCore(new Configuration() { IsResizable = true });
             tc.Init();
 
-            Polygon3DNode node = Model3D.LoadObjFile(@"TestData/3D/bunny.obj").First().ToPolygon3DNode(new Color(255, 0, 0));
+            Polygon3DNode node = Model3D.LoadObjFile(@"TestData/3D/bunny.obj").First().ToPolygon3DNode(new Color(255, 0, 0), true);
             Engine.AddNode(node);
             node.Scale *= 15f;
-            node.Position = new Vector3F(0, -1, 0);
+            node.Position = new Vector3F(0, 0, 0);
+            var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+            node.AddChildNode(lighting);
             tc.Duration = 1000;
+
+            foreach (var current in node.Vertexes) System.Diagnostics.Debug.WriteLine(current.Position);
 
             tc.LoopBody(c =>
             {
+                lighting.LightDirection = new Vector3F(MathF.Cos(c * 0.05f), -1, MathF.Sin(c * 0.05f));
                 var q = node.Quaternion;
                 q.EulerAngles = new Vector3F(0, c, 0);
                 node.Quaternion = q;

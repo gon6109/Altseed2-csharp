@@ -115,13 +115,8 @@ namespace Altseed2
                     _RenderTextureCache = new RenderTextureCache();
 
                     _DefaultCamera = RenderedCamera.Create();
-                    _DefaultCamera.ViewMatrix = Matrix44F.GetTranslation2D(-WindowSize / 2);
                     _DefaultCamera.RenderPassParameter = new RenderPassParameter(ClearColor, false, false);
-
                     _DefaultCamera3D = RenderedCamera3D.Create();
-                    _DefaultCamera3D.ViewMatrix =
-                        Matrix44F.GetPerspectiveFovLH(1.05f, (float)WindowSize.X / WindowSize.Y, 0.1f, 5000) *
-                        Matrix44F.GetLookAtLH(new Vector3F(0, 0, -5), new Vector3F(0, 0, 0), new Vector3F(0, 1, 0));
                     _DefaultCamera3D.RenderPassParameter = new RenderPassParameter(ClearColor, false, false);
 
                     _DrawingRenderedIdsBuffer = new ArrayBuffer<int>();
@@ -163,6 +158,8 @@ namespace Altseed2
         /// </summary>
         public static bool Update()
         {
+            if (_WindowSize != Window.Size) UpdateWindowSize();
+
             if (_CameraNodes != null && _Camera3DNodes != null)
             {
                 var anyCamera = _CameraNodes.Count != 0;
@@ -314,6 +311,7 @@ namespace Altseed2
         internal static void DrawCamera3DGroup(RenderedCamera3D camera, SortedDictionary<int, HashSet<IDrawn3D>> drawns)
         {
             Renderer3D.Camera = camera;
+
             var requireRender = false;
 
             foreach (var (_, znodes) in drawns)
@@ -651,16 +649,28 @@ namespace Altseed2
         /// </summary>
         public static Vector2I WindowSize
         {
-            get => Window.Size;
+            get
+            {
+                if (_WindowSize != Window.Size) UpdateWindowSize();
+                return _WindowSize;
+            }
             set
             {
                 Window.Size = value;
-                _DefaultCamera.ViewMatrix = Matrix44F.GetTranslation2D(-value / 2);
-                _DefaultCamera3D.ViewMatrix =
-                    Matrix44F.GetPerspectiveFovLH(1.05f, (float)value.X / value.Y, 0.1f, 5000) *
-                    Matrix44F.GetLookAtLH(new Vector3F(0, 0, -5), new Vector3F(0, 0, 0), new Vector3F(0, 1, 0));
+                UpdateWindowSize();
             }
         }
+
+        private static void UpdateWindowSize()
+        {
+            _WindowSize = Window.Size;
+            _DefaultCamera.ViewMatrix = Matrix44F.GetTranslation2D(-Window.Size / 2);
+            _DefaultCamera3D.ViewMatrix =
+                Matrix44F.GetPerspectiveFovLH(1.05f, (float)Window.Size.X / Window.Size.Y, 0.1f, 5000) *
+                Matrix44F.GetLookAtLH(new Vector3F(0, 0, -5), new Vector3F(0, 0, 0), new Vector3F(0, 1, 0));
+        }
+
+        private static Vector2I _WindowSize;
 
         internal static Configuration Config { get; private set; }
 

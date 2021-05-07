@@ -414,9 +414,9 @@ namespace Altseed2.Test
 
             var netArray1 = new Vertex[]
             {
-                new Vertex(new Vector3F(10, 10, 10), new Color(10, 10, 10, 10), new Vector2F(10, 10), new Vector2F(10, 10)),
-                new Vertex(new Vector3F(20, 20, 20), new Color(20, 20, 20, 20), new Vector2F(20, 20), new Vector2F(20, 20)),
-                new Vertex(new Vector3F(30, 30, 30), new Color(30, 30, 30, 30), new Vector2F(30, 30), new Vector2F(30, 30))
+                new Vertex(new Vector3F(10, 10, 10),default, new Color(10, 10, 10, 10), new Vector2F(10, 10), new Vector2F(10, 10)),
+                new Vertex(new Vector3F(20, 20, 20),default, new Color(20, 20, 20, 20), new Vector2F(20, 20), new Vector2F(20, 20)),
+                new Vertex(new Vector3F(30, 30, 30),default, new Color(30, 30, 30, 30), new Vector2F(30, 30), new Vector2F(30, 30))
             };
 
             var array1 = Altseed2.VertexArray.Create(netArray1.AsSpan());

@@ -54,9 +54,9 @@ namespace Altseed2
             var models = new List<Model3D>();
             var file = StaticFile.Create(path);
 
-            int vOffset = 1;
-            int uvOffset = 1;
-            int normalOffset = 1;
+            var vertexes = new List<Vector3F>();
+            var uvs = new List<Vector2F>();
+            var normals = new List<Vector3F>();
 
             if (file == null)
                 return Enumerable.Empty<Model3D>();
@@ -65,19 +65,7 @@ namespace Altseed2
             using (var reader = new StreamReader(stream))
             {
                 string line;
-                string[] tokens;
                 Model3D model = null;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    tokens = line.Split(' ');
-                    if ((tokens[0] == "g" || tokens[0] == "o") && tokens.Length == 2)
-                    {
-                        model = new Model3D();
-                        models.Add(model);
-                        model.Name = tokens[1];
-                        break;
-                    }
-                }
 
                 while (true)
                 {
@@ -86,19 +74,22 @@ namespace Altseed2
                     if (line == null)
                         return models;
 
-                    tokens = line.Split(' ');
+                    if (line == "")
+                        continue;
 
-                    if ((tokens[0] == "g" || tokens[0] == "o") && tokens.Length == 2)
+                    var tokens = line.Split(' ').Where(token => token != "").ToList();
+
+                    if (tokens[0].First() == '#')
+                        continue;
+
+                    if ((tokens[0] == "g" || tokens[0] == "o") && tokens.Count >= 2)
                     {
-                        vOffset += model.Vertexes.Count;
-                        uvOffset += model.UVs.Count;
-                        normalOffset += model.Normals.Count;
                         model = new Model3D();
                         models.Add(model);
                         model.Name = tokens[1];
                     }
 
-                    if (tokens[0] == "v" && tokens.Length == 4)
+                    if (tokens[0] == "v" && tokens.Count >= 4)
                     {
                         Vector3F vertex = new Vector3F();
                         try
@@ -111,10 +102,10 @@ namespace Altseed2
                         {
                             Engine.Log.Error(LogCategory.Engine, $"Model3D.Load Error: {e.Message}");
                         }
-                        model.Vertexes.Add(vertex);
+                        vertexes.Add(vertex);
                     }
 
-                    if (tokens[0] == "vt" && tokens.Length == 3)
+                    if (tokens[0] == "vt" && tokens.Count >= 3)
                     {
                         Vector2F uv = new Vector2F();
                         try
@@ -126,10 +117,10 @@ namespace Altseed2
                         {
                             Engine.Log.Error(LogCategory.Engine, $"Model3D.Load Error: {e.Message}");
                         }
-                        model.UVs.Add(uv);
+                        uvs.Add(uv);
                     }
 
-                    if (tokens[0] == "vn" && tokens.Length == 4)
+                    if (tokens[0] == "vn" && tokens.Count >= 4)
                     {
                         Vector3F normal = new Vector3F();
                         try
@@ -142,11 +133,24 @@ namespace Altseed2
                         {
                             Engine.Log.Error(LogCategory.Engine, $"Model3D.Load Error: {e.Message}");
                         }
-                        model.Normals.Add(normal);
+                        normals.Add(normal);
                     }
 
-                    if (tokens[0] == "f" && tokens.Length >= 4)
+                    if (tokens[0] == "f" && tokens.Count >= 4)
                     {
+                        if (model == null)
+                        {
+                            model = new Model3D();
+                            models.Add(model);
+                        }
+
+                        if (model.Vertexes.Count == 0)
+                        {
+                            model.Vertexes.AddRange(vertexes);
+                            model.UVs.AddRange(uvs);
+                            model.Normals.AddRange(normals);
+                        }
+
                         List<(int vertex, int? uv, int? normal)> face = new List<(int vertex, int? uv, int? normal)>();
                         foreach (var token in tokens.Skip(1))
                         {
@@ -154,9 +158,9 @@ namespace Altseed2
                             try
                             {
                                 (int vertex, int? uv, int? normal) v = (
-                                    Convert.ToInt32(indexes[0]) - vOffset,
-                                    indexes.Length >= 2 ? (int?)(Convert.ToInt32(indexes[1]) - uvOffset) : null,
-                                    indexes.Length >= 3 ? (int?)(Convert.ToInt32(indexes[2]) - normalOffset) : null
+                                    Convert.ToInt32(indexes[0]) - 1,
+                                    indexes.Length >= 2 && indexes[1] != "" ? (int?)(Convert.ToInt32(indexes[1]) - 1) : null,
+                                    indexes.Length >= 3 ? (int?)(Convert.ToInt32(indexes[2]) - 1) : null
                                     );
                                 face.Add(v);
                             }
@@ -169,10 +173,7 @@ namespace Altseed2
                         model.Faces.Add(face);
                     }
                 }
-
             }
-
-            return models;
         }
 
         /// <summary>

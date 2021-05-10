@@ -16,7 +16,7 @@ namespace Altseed2.NodeEditor.View
             _viewModel = viewModel;
 
             _viewModel.UpdateRenderTexture(true,
-                RenderTexture.Create(Engine.WindowSize - new Vector2I(600, 18), TextureFormat.R8G8B8A8_UNORM));
+                RenderTexture.Create(Engine.WindowSize - new Vector2I(600, 18), TextureFormat.R8G8B8A8_UNORM, true));
         }
 
         public void Render()
@@ -42,7 +42,7 @@ namespace Altseed2.NodeEditor.View
                 Vector2I texSize = Engine.Tool.GetWindowSize().To2I();
 
                 _viewModel.UpdateRenderTexture(texSize.X > 0 && texSize.Y > 0,
-                    RenderTexture.Create(texSize, TextureFormat.R8G8B8A8_UNORM));
+                    RenderTexture.Create(texSize, TextureFormat.R8G8B8A8_UNORM, true));
 
                 _latestWindowSize = texSize;
             }

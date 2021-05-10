@@ -161,6 +161,33 @@ namespace Altseed2
                                   q1.W * q2.Z + q1.Z * q2.W + q1.X * q2.Y - q1.Y * q2.X);
         }
 
+        /// <summary>
+        /// クォータニオンと3次元ベクトルを積算します．
+        /// </summary>
+        /// <param name="rotation">クォータニオン</param>
+        /// <param name="point">3次元ベクトル</param>
+        /// <returns></returns>
+        public static Vector3F operator *(Quaternion rotation, Vector3F point)
+        {
+            var num = rotation.X * 2;
+            var num2 = rotation.Y * 2;
+            var  num3 = rotation.Z * 2;
+            var num4 = rotation.X * num;
+            var num5 = rotation.Y * num2;
+            var num6 = rotation.Z * num3;
+            var num7 = rotation.X * num2;
+            var num8 = rotation.X * num3;
+            var num9 = rotation.Y * num3;
+            var num10 = rotation.W * num;
+            var num11 = rotation.W * num2;
+            var num12 = rotation.W * num3;
+            Vector3F result;
+            result.X = (1f - (num5 + num6)) * point.X + (num7 - num12) * point.Y + (num8 + num11) * point.Z;
+            result.Y = (num7 + num12) * point.X + (1f - (num4 + num6)) * point.Y + (num9 - num10) * point.Z;
+            result.Z = (num8 - num11) * point.X + (num9 + num10) * point.Y + (1f - (num4 + num5)) * point.Z;
+            return result;
+        }
+
         #endregion
 
     }

@@ -234,7 +234,7 @@ namespace Altseed2
         /// <param name="v1">積算するベクトル1</param>
         /// <param name="v2">積算するベクトル2</param>
         /// <returns>積算結果(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z)</returns>
-        public static Vector3F operator *(Vector3F v1, Vector3F v2) => new Vector3F(v1.X * v2.X, v1.Y * v2.Y, v1.Z + v2.Z);
+        public static Vector3F operator *(Vector3F v1, Vector3F v2) => new Vector3F(v1.X * v2.X, v1.Y * v2.Y, v1.Z * v2.Z);
 
         /// <summary>
         /// ベクトルと値を積算します。

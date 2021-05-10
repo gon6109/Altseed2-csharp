@@ -177,6 +177,190 @@ namespace Altseed2
         }
 
         /// <summary>
+        /// 直方体を作成する
+        /// </summary>
+        /// <param name="harfSize">対角線の半分ベクトル</param>
+        /// <returns></returns>
+        public static Model3D CreateBox(Vector3F harfSize)
+        {
+            var model = new Model3D();
+
+            model.Vertexes.AddRange(new List<Vector3F>()
+            {
+                new Vector3F(-1, 1, -1),
+                new Vector3F(-1, 1, 1),
+                new Vector3F(1, 1, 1),
+                new Vector3F(1, 1, -1),
+                new Vector3F(-1, -1, -1),
+                new Vector3F(-1, -1, 1),
+                new Vector3F(1, -1, 1),
+                new Vector3F(1, -1, -1),
+            }.Select(v => v * harfSize));
+
+            model.Normals.AddRange(new List<Vector3F>()
+            {
+                new Vector3F(1, 0, 0),
+                new Vector3F(-1, 0, 0),
+                new Vector3F(0, 1, 0),
+                new Vector3F(0, -1, 0),
+                new Vector3F(0, 0, 1),
+                new Vector3F(0, 0, -1),
+            });
+
+            model.Faces.Add(new List<(int vertex, int? uv, int? normal)>
+            {
+                (0, null, 2),
+                (1, null, 2),
+                (2, null, 2),
+                (3, null, 2),
+            });
+            model.Faces.Add(new List<(int vertex, int? uv, int? normal)>
+            {
+                (7, null, 3),
+                (6, null, 3),
+                (5, null, 3),
+                (4, null, 3),
+            });
+            model.Faces.Add(new List<(int vertex, int? uv, int? normal)>
+            {
+                (0, null, 5),
+                (3, null, 5),
+                (7, null, 5),
+                (4, null, 5),
+            });
+            model.Faces.Add(new List<(int vertex, int? uv, int? normal)>
+            {
+                (1, null, 1),
+                (0, null, 1),
+                (4, null, 1),
+                (5, null, 1),
+            });
+            model.Faces.Add(new List<(int vertex, int? uv, int? normal)>
+            {
+                (2, null, 4),
+                (1, null, 4),
+                (5, null, 4),
+                (6, null, 4),
+            });
+            model.Faces.Add(new List<(int vertex, int? uv, int? normal)>
+            {
+                (3, null, 0),
+                (2, null, 0),
+                (6, null, 0),
+                (7, null, 0),
+            });
+
+            return model;
+        }
+
+        /// <summary>
+        /// UV球を作成する
+        /// </summary>
+        /// <param name="radius">半径</param>
+        /// <param name="segment">垂直方向の分割数</param>
+        /// <param name="ring">水平方向の分割数</param>
+        /// <returns></returns>
+        public static Model3D CreateUVSphere(float radius, int segment, int ring)
+        {
+            var model = new Model3D();
+
+            // 頂点数(極点2つ+経線・緯線の交点)
+            int vn = 2 + (segment - 1) * ring;
+            model.Vertexes.AddRange(Enumerable.Repeat(new Vector3F(), vn));
+            model.Normals.AddRange(Enumerable.Repeat(new Vector3F(), vn));
+            model.UVs.AddRange(Enumerable.Repeat(new Vector2F(), vn));
+
+            // 北極点
+            model.Vertexes[0] = new Vector3F(0, 0, radius);
+            model.Normals[0] = new Vector3F(0, 0, 1);
+            // 南極点
+            model.Vertexes[vn - 1] = new Vector3F(0, 0, -radius);
+            model.Normals[vn - 1] = new Vector3F(0, 0, -1);
+
+            // Φ(経線に沿った方向の角度)の増分量
+            var dp = MathF.PI / segment;
+            // Θ(緯線に沿った方向の角度)の増分量
+            var dt = 2.0f * MathF.PI / ring;
+
+            // 経線に沿った方向の角度(北極点で0)
+            var phi = dp;
+
+            // 球を構成する頂点の生成
+            for (int i = 0; i < segment - 1; ++i)
+            {
+                var z = radius * MathF.Cos(phi);
+                // 緯線に沿った方向の角度
+                float theta = 0.0f;
+                for (int j = 0; j < ring; ++j)
+                {
+                    var rad_t = radius * MathF.Sin(phi);
+
+                    int idx = 1 + i * ring + j;
+                    model.Vertexes[idx] = new Vector3F(rad_t * MathF.Cos(theta), rad_t * MathF.Sin(theta), z);
+                    model.Normals[idx] = model.Vertexes[idx].Normal;
+                    model.UVs[idx] = new Vector2F(theta / (2.0f * MathF.PI), phi / (MathF.PI));
+
+                    theta += dt;
+                }
+                phi += dp;
+            }
+
+            // ポリゴン生成
+            for (int i = 0; i < segment; ++i)
+            {
+                // 北極点と最初の緯線を接続
+                if (i == 0)
+                {
+                    var f = new List<(int vertex, int? uv, int? normal)>();
+                    for (int j = 0; j < ring; ++j)
+                    {
+                        int k0 = 1 + i * ring + j;
+                        int k1 = 1 + i * ring + (j == ring - 1 ? 0 : j + 1);
+                        f.Add((0, 0, 0));
+                        f.Add((k0, k0, k0));
+                        f.Add((k1, k1, k1));
+                        model.Faces.Add(f);
+                    }
+                }
+                // 南極点と最後の緯線を接続
+                else if (i == segment - 1)
+                {
+                    var f = new List<(int vertex, int? uv, int? normal)>();
+                    for (int j = 0; j < ring; ++j)
+                    {
+                        int k0 = 1 + (i - 1) * ring + j;
+                        int k1 = 1 + (i - 1) * ring + (j == ring - 1 ? 0 : j + 1);
+                        f.Add((vn - 1, vn - 1, vn - 1));
+                        f.Add((k1, k1, k1));
+                        f.Add((k0, k0, k0));
+                        model.Faces.Add(f);
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < ring; ++j)
+                    {
+                        int k0 = 1 + i * ring + j;
+                        int k1 = 1 + i * ring + (j == ring - 1 ? 0 : j + 1);
+                        int k2 = 1 + (i - 1) * ring + j;
+                        int k3 = 1 + (i - 1) * ring + (j == ring - 1 ? 0 : j + 1);
+
+                        var f = new List<(int vertex, int? uv, int? normal)>();
+
+                        // 四角形ポリゴンを用いる
+                        f.Add((k0, k0, k0));
+                        f.Add((k1, k1, k1));
+                        f.Add((k3, k3, k3));
+                        f.Add((k2, k2, k2));
+                        model.Faces.Add(f);
+                    }
+                }
+            }
+
+            return model;
+        }
+
+        /// <summary>
         /// モデルから<see cref="Polygon3DNode"/>を生成する
         /// </summary>
         /// <param name="color"></param>

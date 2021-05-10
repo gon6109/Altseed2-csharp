@@ -2,7 +2,7 @@ name: Altseed
 
 on:
   push:
-    branches: [ master，3d ]
+    branches: [ 3d ]
     tags:
       - '*'
   pull_request: 

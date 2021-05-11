@@ -106,6 +106,8 @@ namespace Altseed2
                 _RootNode = new RootNode();
                 _UpdatedNode = _RootNode;
 
+                _WindowSize = default;
+
                 if (_graphics != null)
                 {
                     _DrawnCollection = new DrawnCollection();

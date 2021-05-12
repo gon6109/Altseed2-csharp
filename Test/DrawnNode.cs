@@ -841,22 +841,107 @@ float4 main(PS_INPUT input) : SV_TARGET
             var tc = new TestCore(new Configuration() { IsResizable = true });
             tc.Init();
 
-            Polygon3DNode node = Model3D.LoadObjFile(@"TestData/3D/bunny.obj").First().ToPolygon3DNode(new Color(255, 0, 0), true);
-            Engine.AddNode(node);
-            node.Scale *= 15f;
-            node.Position = new Vector3F(0, 0, 0);
-            var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
-            node.AddChildNode(lighting);
-            tc.Duration = 1000;
+            var house = new Transform3DNode();
 
-            foreach (var current in node.Vertexes) System.Diagnostics.Debug.WriteLine(current.Position);
+            foreach (var node in Model3D.LoadObjFile(@"TestData/test.obj").Select(model => model.ToPolygon3DNode(new Color(200, 200, 200), true)))
+            {
+                house.AddChildNode(node);
+                var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+                node.AddChildNode(lighting);
+            }
+
+            house.Scale *= 0.01f;
+            Engine.AddNode(house);
+
+            var deer = new Transform3DNode();
+
+            foreach (var node in Model3D.LoadObjFile(@"TestData/test2.obj").Select(model => model.ToPolygon3DNode(new Color(200, 200, 200))))
+            {
+                deer.AddChildNode(node);
+                var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+                node.AddChildNode(lighting);
+            }
+
+            deer.Scale *= 0.01f;
+            deer.Position = new Vector3F(1, 0, 0f);
+            Engine.AddNode(deer);
+
+            var bugatti = new Transform3DNode();
+
+            foreach (var node in Model3D.LoadObjFile(@"TestData/skyline.obj").Select(model => model.ToPolygon3DNode(new Color(200, 200, 200))))
+            {
+                bugatti.AddChildNode(node);
+                var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+                node.AddChildNode(lighting);
+            }
+
+            bugatti.Scale *= 0.3f;
+            bugatti.Position = new Vector3F(0, 0, -1f);
+            Engine.AddNode(bugatti);
+
+            tc.Duration = 1000;
 
             tc.LoopBody(c =>
             {
-                lighting.LightDirection = new Vector3F(MathF.Cos(c * 0.05f), -1, MathF.Sin(c * 0.05f));
-                var q = node.Quaternion;
-                q.EulerAngles = new Vector3F(0, c, 0);
-                node.Quaternion = q;
+                bugatti.Quaternion = Quaternion.Euler(new Vector3F(0, c, 0));
+                deer.Quaternion = Quaternion.Euler(new Vector3F(0, c, 0));
+            }, null);
+
+            tc.End();
+        }
+
+        [Test, Apartment(ApartmentState.STA)]
+        public void Model3DBox()
+        {
+            var tc = new TestCore(new Configuration() { IsResizable = true });
+            tc.Init();
+
+            var model = Model3D.CreateBox(new Vector3F(1, 1, 1));
+            var node = model.ToPolygon3DNode(new Color(200, 200, 200));
+            var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+            node.AddChildNode(lighting);
+            node.AddChildNode(model.ToPolygon3DNodeLine(new Color(0, 0, 0, 255)));
+            Engine.AddNode(node);
+            node.Position = new Vector3F();
+
+            tc.Duration = 1000;
+            foreach (var current in node.Vertexes) Console.WriteLine(current.Position);
+
+            tc.LoopBody(c =>
+            {
+                node.Quaternion = Quaternion.Euler(new Vector3F(c, c, 0));
+            }, null);
+
+            tc.End();
+        }
+
+        [Test, Apartment(ApartmentState.STA)]
+        public void Model3DSphere()
+        {
+            var tc = new TestCore(new Configuration() { IsResizable = true });
+            tc.Init();
+
+            Model3D model = Model3D.CreateUVSphere(1, 10, 10);
+            var node = model.ToPolygon3DNode(new Color(200, 200, 200));
+            var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+            node.AddChildNode(lighting);
+            Engine.AddNode(node);
+
+            Polygon3DNode line = model.ToPolygon3DNodeLine(new Color(0, 0, 0, 255));
+            Engine.AddNode(line);
+
+            tc.Duration = 1000;
+            foreach (var current in node.Vertexes) Console.WriteLine(current.Position);
+
+            tc.LoopBody(c =>
+            {
+                if (c % 60 == 0)
+                    node.IsDrawn = false;
+                else if (c % 30 == 0)
+                    node.IsDrawn = true;
+
+                node.Quaternion = Quaternion.Euler(new Vector3F(c, c, 0));
+                line.Quaternion = Quaternion.Euler(new Vector3F(c, c, 0));
             }, null);
 
             tc.End();

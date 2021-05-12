@@ -463,5 +463,39 @@ namespace Altseed2
 
             return result;
         }
+
+        /// <summary>
+        /// モデルから線の<see cref="Polygon3DNode"/>を生成する
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        public Polygon3DNode ToPolygon3DNodeLine(Color color)
+        {
+            var node = new Polygon3DNode();
+            Dictionary<(int vertex, int? uv, int? normal), int> vertexes = new Dictionary<(int vertex, int? uv, int? normal), int>();
+
+            foreach (var v in Faces.SelectMany(face => face))
+            {
+                if (!vertexes.ContainsKey(v))
+                    vertexes[v] = vertexes.Count;
+            }
+
+            node.Vertexes = vertexes.OrderBy(v => v.Value)
+                .Select(v => new Vertex(Vertexes[v.Key.vertex], GetNormal(v), color, v.Key.uv.HasValue ? UVs[v.Key.uv.Value] : new Vector2F(), new Vector2F()))
+                .ToList();
+
+            node.Buffers = Faces.SelectMany(face => MathHelper.TriangleToLine(DivideToTriangles(face, vertexes))).ToList();
+
+            node.Material = Material.Create();
+            node.Material.Shader = Engine.Graphics.BuiltinShader.Create(BuiltinShaderType.ColorUnlitPS);
+            node.Material.TopologyType = TopologyType.Line;
+
+            return node;
+
+            Vector3F GetNormal(KeyValuePair<(int vertex, int? uv, int? normal), int> v)
+            {
+                return v.Key.normal.HasValue ? Normals[v.Key.normal.Value] : new Vector3F();
+            }
+        }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Altseed2
@@ -348,6 +350,33 @@ namespace Altseed2
             }
 
             return new Vector3F(array[0], array[1], array[2]);
+        }
+
+        /// <summary>
+        /// 三角形の集合を線分の集合に変換する
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="triangles">三角形の集合</param>
+        /// <returns>線分の集合</returns>
+        public static IEnumerable<T> TriangleToLine<T>(IEnumerable<T> triangles)
+        {
+            var enumerator = triangles.GetEnumerator();
+            while (true)
+            {
+                if (!enumerator.MoveNext()) yield break;
+                var v1 = enumerator.Current;
+                if (!enumerator.MoveNext()) yield break;
+                var v2 = enumerator.Current;
+                if (!enumerator.MoveNext()) yield break;
+                var v3 = enumerator.Current;
+
+                yield return v1;
+                yield return v2;
+                yield return v2;
+                yield return v3;
+                yield return v3;
+                yield return v1;
+            }
         }
     }
 }

@@ -134,6 +134,17 @@ namespace Altseed2
     /// 
     /// </summary>
     [Serializable]
+    public enum TopologyType : int
+    {
+        Triangle = 0,
+        Line = 1,
+        Point = 2,
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
     public enum BlendEquation : int
     {
         Add = 0,
@@ -213,6 +224,7 @@ namespace Altseed2
         SpriteUnlitVS = 0,
         SpriteUnlitPS = 1,
         FontUnlitPS = 2,
+        ColorUnlitPS = 3,
     }
     
     /// <summary>
@@ -4301,6 +4313,14 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern int cbg_Material_GetTopologyType(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Material_SetTopologyType(IntPtr selfPtr, int value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern IntPtr cbg_Material_GetPropertyBlock(IntPtr selfPtr);
         
         
@@ -4345,6 +4365,25 @@ namespace Altseed2
             }
         }
         private AlphaBlend? _AlphaBlend;
+        
+        public TopologyType TopologyType
+        {
+            get
+            {
+                if (_TopologyType != null)
+                {
+                    return _TopologyType.Value;
+                }
+                var ret = cbg_Material_GetTopologyType(selfPtr);
+                return (TopologyType)ret;
+            }
+            set
+            {
+                _TopologyType = value;
+                cbg_Material_SetTopologyType(selfPtr, (int)value);
+            }
+        }
+        private TopologyType? _TopologyType;
         
         public MaterialPropertyBlock PropertyBlock
         {

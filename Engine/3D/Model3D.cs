@@ -468,8 +468,9 @@ namespace Altseed2
         /// モデルから線の<see cref="Polygon3DNode"/>を生成する
         /// </summary>
         /// <param name="color"></param>
+        /// <param name="isDividedTriangle">三角形分割を行うか</param>
         /// <returns></returns>
-        public Polygon3DNode ToPolygon3DNodeLine(Color color)
+        public Polygon3DNode ToPolygon3DNodeLine(Color color, bool isDividedTriangle = false)
         {
             var node = new Polygon3DNode();
             Dictionary<(int vertex, int? uv, int? normal), int> vertexes = new Dictionary<(int vertex, int? uv, int? normal), int>();
@@ -484,7 +485,9 @@ namespace Altseed2
                 .Select(v => new Vertex(Vertexes[v.Key.vertex], GetNormal(v), color, v.Key.uv.HasValue ? UVs[v.Key.uv.Value] : new Vector2F(), new Vector2F()))
                 .ToList();
 
-            node.Buffers = Faces.SelectMany(face => MathHelper.TriangleToLine(DivideToTriangles(face, vertexes))).ToList();
+            node.Buffers = Faces
+                .SelectMany(face => isDividedTriangle ? MathHelper.TrianglesToLines(DivideToTriangles(face, vertexes)) : MathHelper.FaceToLines(face.Select(v => vertexes[v])))
+                .ToList();
 
             node.Material = Material.Create();
             node.Material.Shader = Engine.Graphics.BuiltinShader.Create(BuiltinShaderType.ColorUnlitPS);

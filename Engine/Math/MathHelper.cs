@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Altseed2
@@ -358,7 +359,7 @@ namespace Altseed2
         /// <typeparam name="T"></typeparam>
         /// <param name="triangles">三角形の集合</param>
         /// <returns>線分の集合</returns>
-        public static IEnumerable<T> TriangleToLine<T>(IEnumerable<T> triangles)
+        public static IEnumerable<T> TrianglesToLines<T>(IEnumerable<T> triangles)
         {
             var enumerator = triangles.GetEnumerator();
             while (true)
@@ -377,6 +378,37 @@ namespace Altseed2
                 yield return v3;
                 yield return v1;
             }
+        }
+
+        /// <summary>
+        /// 面を線分の集合に変換する
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="face">面</param>
+        /// <returns>線分の集合</returns>
+        public static IEnumerable<T> FaceToLines<T>(IEnumerable<T> face)
+        {
+            if (face.Count() < 3)
+                yield break;
+
+            var enumerator = face.GetEnumerator();
+
+            enumerator.MoveNext();
+            T pre = enumerator.Current;
+
+            while (true)
+            {
+                if (!enumerator.MoveNext()) break;
+                var v = enumerator.Current;
+
+                yield return pre;
+                yield return v;
+
+                pre = v;
+            }
+
+            yield return face.Last();
+            yield return face.First();
         }
     }
 }

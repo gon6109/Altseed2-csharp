@@ -174,5 +174,19 @@ namespace Altseed2
             info.AddValue(S_Textures, textures);
             info.AddValue(S_Vectors, vectors);
         }
+
+        /// <summary>
+        /// 線用マテリアル
+        /// </summary>
+        public static Material Line
+        {
+            get
+            {
+                var material = Material.Create();
+                material.Shader = Engine.Graphics.BuiltinShader.Create(BuiltinShaderType.ColorUnlitPS);
+                material.TopologyType = TopologyType.Line;
+                return material;
+            }
+        }
     }
 }

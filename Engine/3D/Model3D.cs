@@ -489,9 +489,7 @@ namespace Altseed2
                 .SelectMany(face => isDividedTriangle ? MathHelper.TrianglesToLines(DivideToTriangles(face, vertexes)) : MathHelper.FaceToLines(face.Select(v => vertexes[v])))
                 .ToList();
 
-            node.Material = Material.Create();
-            node.Material.Shader = Engine.Graphics.BuiltinShader.Create(BuiltinShaderType.ColorUnlitPS);
-            node.Material.TopologyType = TopologyType.Line;
+            node.Material = Material.Line;
 
             return node;
 

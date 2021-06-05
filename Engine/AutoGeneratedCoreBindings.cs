@@ -14832,16 +14832,25 @@ namespace Altseed2
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern Vector3F cbg_TriangleCollider3D_GetPoint1(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_TriangleCollider3D_SetPoint1(IntPtr selfPtr, Vector3F value);
         
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern Vector3F cbg_TriangleCollider3D_GetPoint2(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_TriangleCollider3D_SetPoint2(IntPtr selfPtr, Vector3F value);
         
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern Vector3F cbg_TriangleCollider3D_GetPoint3(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_TriangleCollider3D_SetPoint3(IntPtr selfPtr, Vector3F value);
         
         
         [DllImport("Altseed2_Core")]
@@ -14860,28 +14869,58 @@ namespace Altseed2
         {
             get
             {
+                if (_Point1 != null)
+                {
+                    return _Point1.Value;
+                }
                 var ret = cbg_TriangleCollider3D_GetPoint1(selfPtr);
                 return ret;
             }
+            set
+            {
+                _Point1 = value;
+                cbg_TriangleCollider3D_SetPoint1(selfPtr, value);
+            }
         }
+        private Vector3F? _Point1;
         
         public Vector3F Point2
         {
             get
             {
+                if (_Point2 != null)
+                {
+                    return _Point2.Value;
+                }
                 var ret = cbg_TriangleCollider3D_GetPoint2(selfPtr);
                 return ret;
             }
+            set
+            {
+                _Point2 = value;
+                cbg_TriangleCollider3D_SetPoint2(selfPtr, value);
+            }
         }
+        private Vector3F? _Point2;
         
         public Vector3F Point3
         {
             get
             {
+                if (_Point3 != null)
+                {
+                    return _Point3.Value;
+                }
                 var ret = cbg_TriangleCollider3D_GetPoint3(selfPtr);
                 return ret;
             }
+            set
+            {
+                _Point3 = value;
+                cbg_TriangleCollider3D_SetPoint3(selfPtr, value);
+            }
         }
+        private Vector3F? _Point3;
         
         public static TriangleCollider3D Create(Vector3F p1, Vector3F p2, Vector3F p3)
         {

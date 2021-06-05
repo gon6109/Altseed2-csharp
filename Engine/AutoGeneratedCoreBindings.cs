@@ -201,8 +201,9 @@ namespace Altseed2
         RequireGraphics = 96,
         RequireWindow = 125,
         Sound = 128,
-        Default = 191,
         RequireFile = 226,
+        Physics = 256,
+        Default = 447,
     }
     
     /// <summary>
@@ -2583,6 +2584,297 @@ namespace Altseed2
                 if (selfPtr != IntPtr.Zero)
                 {
                     cbg_Vector2FArray_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 3次元ベクトルの配列のクラスを表します。
+    /// </summary>
+    [Serializable]
+    internal sealed partial class Vector3FArray : ISerializable, ICacheKeeper<Vector3FArray>
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<Vector3FArray>> cacheRepo = new Dictionary<IntPtr, WeakReference<Vector3FArray>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static  Vector3FArray TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                Vector3FArray cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_Vector3FArray_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new Vector3FArray(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<Vector3FArray>(newObject);
+            return newObject;
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal IntPtr selfPtr = IntPtr.Zero;
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Vector3FArray_Clear(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Vector3FArray_Resize(IntPtr selfPtr, int size);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_Vector3FArray_GetData(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Vector3FArray_Assign(IntPtr selfPtr, IntPtr ptr, int size);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Vector3FArray_CopyTo(IntPtr selfPtr, IntPtr ptr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_Vector3FArray_GetAt(IntPtr selfPtr, int index);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Vector3FArray_SetAt(IntPtr selfPtr, int index, Vector3F value);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_Vector3FArray_Create(int size);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern int cbg_Vector3FArray_GetCount(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Vector3FArray_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal Vector3FArray(MemoryHandle handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        /// <summary>
+        /// 格納されている要素の数を取得します。
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                var ret = cbg_Vector3FArray_GetCount(selfPtr);
+                return ret;
+            }
+        }
+        
+        /// <summary>
+        /// データをクリアします。
+        /// </summary>
+        internal void Clear()
+        {
+            cbg_Vector3FArray_Clear(selfPtr);
+        }
+        
+        /// <summary>
+        /// サイズを変更します。
+        /// </summary>
+        /// <param name="size">要素数</param>
+        public void Resize(int size)
+        {
+            cbg_Vector3FArray_Resize(selfPtr, size);
+        }
+        
+        internal IntPtr GetData()
+        {
+            var ret = cbg_Vector3FArray_GetData(selfPtr);
+            return ret;
+        }
+        
+        public void Assign(IntPtr ptr, int size)
+        {
+            cbg_Vector3FArray_Assign(selfPtr, ptr, size);
+        }
+        
+        /// <summary>
+        /// データを指定したポインタにコピーします。
+        /// </summary>
+        /// <param name="ptr">ポインタ</param>
+        public void CopyTo(IntPtr ptr)
+        {
+            cbg_Vector3FArray_CopyTo(selfPtr, ptr);
+        }
+        
+        /// <summary>
+        /// インデックスアクセス
+        /// </summary>
+        /// <param name="index">インデックス</param>
+        internal Vector3F GetAt(int index)
+        {
+            var ret = cbg_Vector3FArray_GetAt(selfPtr, index);
+            return ret;
+        }
+        
+        /// <summary>
+        /// インデックスアクセス
+        /// </summary>
+        /// <param name="index">インデックス</param>
+        /// <param name="value">値</param>
+        internal void SetAt(int index, Vector3F value)
+        {
+            cbg_Vector3FArray_SetAt(selfPtr, index, value);
+        }
+        
+        /// <summary>
+        /// インスタンスを作成します。
+        /// </summary>
+        /// <param name="size">要素数</param>
+        internal static Vector3FArray Create(int size)
+        {
+            var ret = cbg_Vector3FArray_Create(size);
+            return Vector3FArray.TryGetFromCache(ret);
+        }
+        
+        
+        #region ISerialiable
+        
+        #region SerializeName
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private const string S_Count = "S_Count";
+        #endregion
+        
+        /// <summary>
+        /// シリアライズされたデータをもとに<see cref="Vector3FArray"/>のインスタンスを生成します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private Vector3FArray(SerializationInfo info, StreamingContext context) : this(new MemoryHandle(IntPtr.Zero))
+        {
+            var ptr = Call_GetPtr(info);
+            
+            if (ptr == IntPtr.Zero) throw new SerializationException("インスタンス生成に失敗しました");
+            CacheHelper.CacheHandlingOnDeserialization(this, ptr);
+            
+            
+            OnDeserialize_Constructor(info, context);
+        }
+        
+        /// <summary>
+        /// シリアライズするデータを設定します。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null) throw new ArgumentNullException(nameof(info), "引数がnullです");
+            
+            info.AddValue(S_Count, Count);
+            
+            OnGetObjectData(info, context);
+        }
+        
+        /// <summary>
+        /// <see cref="ISerializable.GetObjectData(SerializationInfo, StreamingContext)"/>内で実行されます。
+        /// </summary>
+        /// <param name="info">シリアライズされるデータを格納するオブジェクト</param>
+        /// <param name="context">送信先の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnGetObjectData(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="Vector3FArray(SerializationInfo, StreamingContext)"/>内で実行します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="context">送信元の情報</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void OnDeserialize_Constructor(SerializationInfo info, StreamingContext context);
+        
+        /// <summary>
+        /// <see cref="Vector3FArray(SerializationInfo, StreamingContext)"/>内で呼び出される
+        /// デシリアライズ時にselfPtrを取得する操作をここに必ず書くこと
+        /// </summary>
+        /// <param name="ptr">selfPtrとなる値 初期値である<see cref="IntPtr.Zero"/>のままだと<see cref="SerializationException"/>がスローされる</param>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        partial void Deserialize_GetPtr(ref IntPtr ptr, SerializationInfo info);
+        
+        /// <summary>
+        /// 呼び出し禁止
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private IntPtr Call_GetPtr(SerializationInfo info)
+        {
+            var ptr = IntPtr.Zero;
+            Deserialize_GetPtr(ref ptr, info);
+            return ptr;
+        }
+        
+        /// <summary>
+        /// <see cref="Vector3FArray(SerializationInfo, StreamingContext)"/>でデシリアライズされなかったオブジェクトを呼び出します。
+        /// </summary>
+        /// <param name="info">シリアライズされたデータを格納するオブジェクト</param>
+        /// <param name="Count"><see cref="Vector3FArray.Count"/></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private void Vector3FArray_Unsetter_Deserialize(SerializationInfo info, out int Count)
+        {
+            Count = info.GetInt32(S_Count);
+        }
+        
+        #region ICacheKeeper
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IDictionary<IntPtr, WeakReference<Vector3FArray>> ICacheKeeper<Vector3FArray>.CacheRepo => cacheRepo;
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IntPtr ICacheKeeper<Vector3FArray>.Self
+        {
+            get => selfPtr;
+            set
+            {
+                selfPtr = value;
+            }
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void ICacheKeeper<Vector3FArray>.Release(IntPtr native) => cbg_Vector3FArray_Release(native);
+        
+        #endregion
+        
+        #endregion
+        
+        /// <summary>
+        /// <see cref="Vector3FArray"/>のインスタンスを削除します。
+        /// </summary>
+        ~Vector3FArray()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_Vector3FArray_Release(selfPtr);
                     selfPtr = IntPtr.Zero;
                 }
             }
@@ -13675,6 +13967,1045 @@ namespace Altseed2
     }
     
     /// <summary>
+    /// 
+    /// </summary>
+    public sealed partial class Collision3DWorld
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<Collision3DWorld>> cacheRepo = new Dictionary<IntPtr, WeakReference<Collision3DWorld>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static  Collision3DWorld TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                Collision3DWorld cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_Collision3DWorld_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new Collision3DWorld(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<Collision3DWorld>(newObject);
+            return newObject;
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal IntPtr selfPtr = IntPtr.Zero;
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_Collision3DWorld_GetInstance();
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collision3DWorld_Update(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Collision3DWorld_GetIsCollided(IntPtr selfPtr, IntPtr collider1, IntPtr collider2, [Out] out Vector3F point1, [Out] out Vector3F point2);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collision3DWorld_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal Collision3DWorld(MemoryHandle handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        internal static Collision3DWorld GetInstance()
+        {
+            var ret = cbg_Collision3DWorld_GetInstance();
+            return Collision3DWorld.TryGetFromCache(ret);
+        }
+        
+        public void Update()
+        {
+            cbg_Collision3DWorld_Update(selfPtr);
+        }
+        
+        public bool GetIsCollided(Collider3D collider1, Collider3D collider2, out Vector3F point1, out Vector3F point2)
+        {
+            var ret = cbg_Collision3DWorld_GetIsCollided(selfPtr, collider1 != null ? collider1.selfPtr : IntPtr.Zero, collider2 != null ? collider2.selfPtr : IntPtr.Zero, out point1, out point2);
+            return ret;
+        }
+        
+        /// <summary>
+        /// <see cref="Collision3DWorld"/>のインスタンスを削除します。
+        /// </summary>
+        ~Collision3DWorld()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_Collision3DWorld_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<Collider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<Collider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static  Collider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                Collider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_Collider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new Collider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<Collider3D>(newObject);
+            return newObject;
+        }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal IntPtr selfPtr = IntPtr.Zero;
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Collider3D_GetIsCollidedWith_Collider3D(IntPtr selfPtr, IntPtr collider);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Collider3D_GetIsCollidedWith_Collider3D_Vector3F_Cp_Vector3F_Cp(IntPtr selfPtr, IntPtr collider, [Out] out Vector3F point1, [Out] out Vector3F point2);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_Collider3D_GetPosition(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collider3D_SetPosition(IntPtr selfPtr, Vector3F value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Matrix44F cbg_Collider3D_GetRotation(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collider3D_SetRotation(IntPtr selfPtr, Matrix44F value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Matrix44F cbg_Collider3D_GetTransform(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collider3D_SetTransform(IntPtr selfPtr, Matrix44F value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal Collider3D(MemoryHandle handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        public bool GetIsCollidedWith(Collider3D collider)
+        {
+            var ret = cbg_Collider3D_GetIsCollidedWith_Collider3D(selfPtr, collider != null ? collider.selfPtr : IntPtr.Zero);
+            return ret;
+        }
+        
+        public bool GetIsCollidedWith(Collider3D collider, out Vector3F point1, out Vector3F point2)
+        {
+            var ret = cbg_Collider3D_GetIsCollidedWith_Collider3D_Vector3F_Cp_Vector3F_Cp(selfPtr, collider != null ? collider.selfPtr : IntPtr.Zero, out point1, out point2);
+            return ret;
+        }
+        
+        /// <summary>
+        /// <see cref="Collider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~Collider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_Collider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class TetrahedronCollider3D : Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<TetrahedronCollider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<TetrahedronCollider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new TetrahedronCollider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                TetrahedronCollider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_TetrahedronCollider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new TetrahedronCollider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<TetrahedronCollider3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_TetrahedronCollider3D_Create(Vector3F p1, Vector3F p2, Vector3F p3, Vector3F p4);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_TetrahedronCollider3D_GetPoint1(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_TetrahedronCollider3D_GetPoint2(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_TetrahedronCollider3D_GetPoint3(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_TetrahedronCollider3D_GetPoint4(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_TetrahedronCollider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal TetrahedronCollider3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        public Vector3F Point1
+        {
+            get
+            {
+                var ret = cbg_TetrahedronCollider3D_GetPoint1(selfPtr);
+                return ret;
+            }
+        }
+        
+        public Vector3F Point2
+        {
+            get
+            {
+                var ret = cbg_TetrahedronCollider3D_GetPoint2(selfPtr);
+                return ret;
+            }
+        }
+        
+        public Vector3F Point3
+        {
+            get
+            {
+                var ret = cbg_TetrahedronCollider3D_GetPoint3(selfPtr);
+                return ret;
+            }
+        }
+        
+        public Vector3F Point4
+        {
+            get
+            {
+                var ret = cbg_TetrahedronCollider3D_GetPoint4(selfPtr);
+                return ret;
+            }
+        }
+        
+        public static TetrahedronCollider3D Create(Vector3F p1, Vector3F p2, Vector3F p3, Vector3F p4)
+        {
+            var ret = cbg_TetrahedronCollider3D_Create(p1, p2, p3, p4);
+            return TetrahedronCollider3D.TryGetFromCache(ret);
+        }
+        
+        /// <summary>
+        /// <see cref="TetrahedronCollider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~TetrahedronCollider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_TetrahedronCollider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class BoxCollider3D : Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<BoxCollider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<BoxCollider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new BoxCollider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                BoxCollider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_BoxCollider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new BoxCollider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<BoxCollider3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_BoxCollider3D_Create(Vector3F halfSize);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_BoxCollider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal BoxCollider3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        public static BoxCollider3D Create(Vector3F halfSize)
+        {
+            var ret = cbg_BoxCollider3D_Create(halfSize);
+            return BoxCollider3D.TryGetFromCache(ret);
+        }
+        
+        /// <summary>
+        /// <see cref="BoxCollider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~BoxCollider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_BoxCollider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class CylinderCollider3D : Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<CylinderCollider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<CylinderCollider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new CylinderCollider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                CylinderCollider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_CylinderCollider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new CylinderCollider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<CylinderCollider3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_CylinderCollider3D_Create(Vector3F halfExtents);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_CylinderCollider3D_GetRadius(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_CylinderCollider3D_GetHalfExtents(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_CylinderCollider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal CylinderCollider3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        public float Radius
+        {
+            get
+            {
+                var ret = cbg_CylinderCollider3D_GetRadius(selfPtr);
+                return ret;
+            }
+        }
+        
+        public Vector3F HalfExtents
+        {
+            get
+            {
+                var ret = cbg_CylinderCollider3D_GetHalfExtents(selfPtr);
+                return ret;
+            }
+        }
+        
+        public static CylinderCollider3D Create(Vector3F halfExtents)
+        {
+            var ret = cbg_CylinderCollider3D_Create(halfExtents);
+            return CylinderCollider3D.TryGetFromCache(ret);
+        }
+        
+        /// <summary>
+        /// <see cref="CylinderCollider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~CylinderCollider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_CylinderCollider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class ConeCollider3D : Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<ConeCollider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<ConeCollider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new ConeCollider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                ConeCollider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_ConeCollider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new ConeCollider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<ConeCollider3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_ConeCollider3D_Create(float radius, float height);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_ConeCollider3D_GetRadius(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_ConeCollider3D_SetRadius(IntPtr selfPtr, float value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_ConeCollider3D_GetHeight(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_ConeCollider3D_SetHeight(IntPtr selfPtr, float value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_ConeCollider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal ConeCollider3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        public float Radius
+        {
+            get
+            {
+                if (_Radius != null)
+                {
+                    return _Radius.Value;
+                }
+                var ret = cbg_ConeCollider3D_GetRadius(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _Radius = value;
+                cbg_ConeCollider3D_SetRadius(selfPtr, value);
+            }
+        }
+        private float? _Radius;
+        
+        public float Height
+        {
+            get
+            {
+                if (_Height != null)
+                {
+                    return _Height.Value;
+                }
+                var ret = cbg_ConeCollider3D_GetHeight(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _Height = value;
+                cbg_ConeCollider3D_SetHeight(selfPtr, value);
+            }
+        }
+        private float? _Height;
+        
+        public static ConeCollider3D Create(float radius, float height)
+        {
+            var ret = cbg_ConeCollider3D_Create(radius, height);
+            return ConeCollider3D.TryGetFromCache(ret);
+        }
+        
+        /// <summary>
+        /// <see cref="ConeCollider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~ConeCollider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_ConeCollider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class CapsuleCollider3D : Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<CapsuleCollider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<CapsuleCollider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new CapsuleCollider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                CapsuleCollider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_CapsuleCollider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new CapsuleCollider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<CapsuleCollider3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_CapsuleCollider3D_Create(float radius, float height);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_CapsuleCollider3D_GetRadius(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_CapsuleCollider3D_GetHeight(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_CapsuleCollider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal CapsuleCollider3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        public float Radius
+        {
+            get
+            {
+                var ret = cbg_CapsuleCollider3D_GetRadius(selfPtr);
+                return ret;
+            }
+        }
+        
+        public float Height
+        {
+            get
+            {
+                var ret = cbg_CapsuleCollider3D_GetHeight(selfPtr);
+                return ret;
+            }
+        }
+        
+        public static CapsuleCollider3D Create(float radius, float height)
+        {
+            var ret = cbg_CapsuleCollider3D_Create(radius, height);
+            return CapsuleCollider3D.TryGetFromCache(ret);
+        }
+        
+        /// <summary>
+        /// <see cref="CapsuleCollider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~CapsuleCollider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_CapsuleCollider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class SphereCollider3D : Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<SphereCollider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<SphereCollider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new SphereCollider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                SphereCollider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_SphereCollider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new SphereCollider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<SphereCollider3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_SphereCollider3D_Create(float radius);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_SphereCollider3D_GetRadius(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_SphereCollider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal SphereCollider3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        public float Radius
+        {
+            get
+            {
+                var ret = cbg_SphereCollider3D_GetRadius(selfPtr);
+                return ret;
+            }
+        }
+        
+        public static SphereCollider3D Create(float radius)
+        {
+            var ret = cbg_SphereCollider3D_Create(radius);
+            return SphereCollider3D.TryGetFromCache(ret);
+        }
+        
+        /// <summary>
+        /// <see cref="SphereCollider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~SphereCollider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_SphereCollider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class TriangleCollider3D : Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<TriangleCollider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<TriangleCollider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new TriangleCollider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                TriangleCollider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_TriangleCollider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new TriangleCollider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<TriangleCollider3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_TriangleCollider3D_Create(Vector3F p1, Vector3F p2, Vector3F p3);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_TriangleCollider3D_GetPoint1(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_TriangleCollider3D_GetPoint2(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3F cbg_TriangleCollider3D_GetPoint3(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_TriangleCollider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal TriangleCollider3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        public Vector3F Point1
+        {
+            get
+            {
+                var ret = cbg_TriangleCollider3D_GetPoint1(selfPtr);
+                return ret;
+            }
+        }
+        
+        public Vector3F Point2
+        {
+            get
+            {
+                var ret = cbg_TriangleCollider3D_GetPoint2(selfPtr);
+                return ret;
+            }
+        }
+        
+        public Vector3F Point3
+        {
+            get
+            {
+                var ret = cbg_TriangleCollider3D_GetPoint3(selfPtr);
+                return ret;
+            }
+        }
+        
+        public static TriangleCollider3D Create(Vector3F p1, Vector3F p2, Vector3F p3)
+        {
+            var ret = cbg_TriangleCollider3D_Create(p1, p2, p3);
+            return TriangleCollider3D.TryGetFromCache(ret);
+        }
+        
+        /// <summary>
+        /// <see cref="TriangleCollider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~TriangleCollider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_TriangleCollider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public partial class PointCloudCollider3D : Collider3D
+    {
+        #region unmanaged
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static Dictionary<IntPtr, WeakReference<PointCloudCollider3D>> cacheRepo = new Dictionary<IntPtr, WeakReference<PointCloudCollider3D>>();
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static new PointCloudCollider3D TryGetFromCache(IntPtr native)
+        {
+            if(native == IntPtr.Zero) return null;
+        
+            if(cacheRepo.ContainsKey(native))
+            {
+                PointCloudCollider3D cacheRet;
+                cacheRepo[native].TryGetTarget(out cacheRet);
+                if(cacheRet != null)
+                {
+                    cbg_PointCloudCollider3D_Release(native);
+                    return cacheRet;
+                }
+                else
+                {
+                    cacheRepo.Remove(native);
+                }
+            }
+        
+            var newObject = new PointCloudCollider3D(new MemoryHandle(native));
+            cacheRepo[native] = new WeakReference<PointCloudCollider3D>(newObject);
+            return newObject;
+        }
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_PointCloudCollider3D_Create();
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_PointCloudCollider3D_GetPoints(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_PointCloudCollider3D_SetPoints(IntPtr selfPtr, IntPtr value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_PointCloudCollider3D_Release(IntPtr selfPtr);
+        
+        #endregion
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal PointCloudCollider3D(MemoryHandle handle) : base(handle)
+        {
+            selfPtr = handle.selfPtr;
+        }
+        
+        internal Vector3FArray Points
+        {
+            get
+            {
+                if (_Points != null)
+                {
+                    return _Points;
+                }
+                var ret = cbg_PointCloudCollider3D_GetPoints(selfPtr);
+                return Vector3FArray.TryGetFromCache(ret);
+            }
+            set
+            {
+                _Points = value;
+                cbg_PointCloudCollider3D_SetPoints(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
+            }
+        }
+        private Vector3FArray _Points;
+        
+        public static PointCloudCollider3D Create()
+        {
+            var ret = cbg_PointCloudCollider3D_Create();
+            return PointCloudCollider3D.TryGetFromCache(ret);
+        }
+        
+        /// <summary>
+        /// <see cref="PointCloudCollider3D"/>のインスタンスを削除します。
+        /// </summary>
+        ~PointCloudCollider3D()
+        {
+            lock (this) 
+            {
+                if (selfPtr != IntPtr.Zero)
+                {
+                    cbg_PointCloudCollider3D_Release(selfPtr);
+                    selfPtr = IntPtr.Zero;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
     /// 音源のクラス
     /// </summary>
     [Serializable]
@@ -14461,7 +15792,17 @@ namespace Altseed2
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Tool_ColorEdit3_char16p_Color_Cp_ToolColorEditFlags(IntPtr selfPtr, [MarshalAs(UnmanagedType.LPWStr)] string label, [In, Out] ref Color color, int flags);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool cbg_Tool_ColorEdit3_char16p_FloatArray_ToolColorEditFlags(IntPtr selfPtr, [MarshalAs(UnmanagedType.LPWStr)] string label, IntPtr col, int flags);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Tool_ColorEdit4_char16p_Color_Cp_ToolColorEditFlags(IntPtr selfPtr, [MarshalAs(UnmanagedType.LPWStr)] string label, [In, Out] ref Color color, int flags);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -14481,6 +15822,11 @@ namespace Altseed2
         [EditorBrowsable(EditorBrowsableState.Never)]
         [return: MarshalAs(UnmanagedType.U1)]
         private static extern bool cbg_Tool_Combo(IntPtr selfPtr, [MarshalAs(UnmanagedType.LPWStr)] string label, [In, Out] ref int current_item, [MarshalAs(UnmanagedType.LPWStr)] string items_separated_by_tabs, int popup_max_height_in_items);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Tool_ColorButton(IntPtr selfPtr, [MarshalAs(UnmanagedType.LPWStr)] string desc_id, [In, Out] ref Color col, int flags, Vector2F size);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -15904,12 +17250,40 @@ namespace Altseed2
         /// 色を入力するツールを生成します。
         /// </summary>
         /// <param name="label">横に表示するラベルのテキスト</param>
+        /// <param name="color">扱う色</param>
+        /// <param name="flags">適用する設定</param>
+        /// <exception cref="ArgumentNullException"><paramref name="label"/>がnull</exception>
+        public bool ColorEdit3(string label, ref Color color, ToolColorEditFlags flags)
+        {
+            if (label == null) throw new ArgumentNullException(nameof(label), "引数がnullです");
+            var ret = cbg_Tool_ColorEdit3_char16p_Color_Cp_ToolColorEditFlags(selfPtr, label, ref color, (int)flags);
+            return ret;
+        }
+        
+        /// <summary>
+        /// 色を入力するツールを生成します。
+        /// </summary>
+        /// <param name="label">横に表示するラベルのテキスト</param>
         /// <param name="flags">適用する設定</param>
         /// <exception cref="ArgumentNullException"><paramref name="label"/>がnull</exception>
         internal bool ColorEdit3(string label, FloatArray col, ToolColorEditFlags flags)
         {
             if (label == null) throw new ArgumentNullException(nameof(label), "引数がnullです");
             var ret = cbg_Tool_ColorEdit3_char16p_FloatArray_ToolColorEditFlags(selfPtr, label, col != null ? col.selfPtr : IntPtr.Zero, (int)flags);
+            return ret;
+        }
+        
+        /// <summary>
+        /// 色を入力するツールを生成します。
+        /// </summary>
+        /// <param name="label">横に表示するラベルのテキスト</param>
+        /// <param name="color">扱う色</param>
+        /// <param name="flags">適用する設定</param>
+        /// <exception cref="ArgumentNullException"><paramref name="label"/>がnull</exception>
+        public bool ColorEdit4(string label, ref Color color, ToolColorEditFlags flags)
+        {
+            if (label == null) throw new ArgumentNullException(nameof(label), "引数がnullです");
+            var ret = cbg_Tool_ColorEdit4_char16p_Color_Cp_ToolColorEditFlags(selfPtr, label, ref color, (int)flags);
             return ret;
         }
         
@@ -15962,6 +17336,13 @@ namespace Altseed2
             if (label == null) throw new ArgumentNullException(nameof(label), "引数がnullです");
             if (items_separated_by_tabs == null) throw new ArgumentNullException(nameof(items_separated_by_tabs), "引数がnullです");
             var ret = cbg_Tool_Combo(selfPtr, label, ref current_item, items_separated_by_tabs, popup_max_height_in_items);
+            return ret;
+        }
+        
+        public bool ColorButton(string desc_id, ref Color col, ToolColorEditFlags flags, Vector2F size)
+        {
+            if (desc_id == null) throw new ArgumentNullException(nameof(desc_id), "引数がnullです");
+            var ret = cbg_Tool_ColorButton(selfPtr, desc_id, ref col, (int)flags, size);
             return ret;
         }
         

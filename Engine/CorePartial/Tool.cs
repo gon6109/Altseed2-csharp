@@ -382,29 +382,6 @@ namespace Altseed2
             PlotHistogram(label, floatArray, values_count, valuesOffset, overlayText, scaleMin, scaleMax, graphSize, stride);
         }
 
-        public bool ColorEdit3(string label, ref Color col, ToolColorEditFlags flags)
-        {
-            float[] span = new float[3] { col.R / 255f, col.G / 255f, col.B / 255f };
-            floatArray.FromSpan(span);
-            var res = ColorEdit3(label, floatArray, flags);
-            col.R = (byte)(floatArray[0] * 255);
-            col.G = (byte)(floatArray[1] * 255);
-            col.B = (byte)(floatArray[2] * 255);
-            return res;
-        }
-
-        public bool ColorEdit4(string label, ref Color col, ToolColorEditFlags flags)
-        {
-            float[] span = new float[4] { col.R / 255f, col.G / 255f, col.B / 255f, col.A / 255f };
-            floatArray.FromSpan(span);
-            var res = ColorEdit4(label, floatArray, flags);
-            col.R = (byte)(floatArray[0] * 255);
-            col.G = (byte)(floatArray[1] * 255);
-            col.B = (byte)(floatArray[2] * 255);
-            col.A = (byte)(floatArray[3] * 255);
-            return res;
-        }
-
         public bool DragInt2(string label, Span<int> span, float v_speed, int v_min, int v_max, string format, ToolSliderFlags flags)
         {
             if (span.Length < 2)

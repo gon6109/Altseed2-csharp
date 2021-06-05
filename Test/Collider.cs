@@ -437,8 +437,8 @@ namespace Altseed2.Test
             };
             var colliderNode = new EdgeColliderNode()
             {
-                Point1 = new Vector2F( 0, texture.Size.Y / 2),
-                Point2 = new Vector2F( 0, -texture.Size.Y / 2),
+                Point1 = new Vector2F(0, texture.Size.Y / 2),
+                Point2 = new Vector2F(0, -texture.Size.Y / 2),
             };
             comparison.AddChildNode(colliderNode);
             colliderNode.AddChildNode(ColliderVisualizeNodeFactory.Create(colliderNode));
@@ -453,6 +453,51 @@ namespace Altseed2.Test
                     Assert.AreEqual(manager.ColliderCount, 2);
                 }
             });
+            tc.End();
+        }
+
+        [Test, Apartment(ApartmentState.STA)]
+        public void Collider3D()
+        {
+            var tc = new TestCore(new Configuration() { IsResizable = true });
+            tc.Init();
+
+            var model = Model3D.CreateBox(new Vector3F(1f, 0.5f, 0.7f));
+            var node = model.ToPolygon3DNode(new Color(200, 200, 200));
+            var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+            node.AddChildNode(lighting);
+            node.AddChildNode(model.ToPolygon3DNodeLine(new Color(0, 0, 0, 255)));
+            Engine.AddNode(node);
+            node.Position = new Vector3F();
+
+            var sphere = Model3D.CreateUVSphere(0.5f, 10, 10);
+            var node2 = sphere.ToPolygon3DNode(new Color(200, 200, 200));
+            var lighting2 = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+            node2.AddChildNode(lighting2);
+            node2.AddChildNode(sphere.ToPolygon3DNodeLine(new Color(0, 0, 0, 255)));
+            Engine.AddNode(node2);
+            node2.Position = new Vector3F(-3, 0, 0);
+
+            var col = BoxCollider3D.Create(new Vector3F(1, 0.5f, 1));
+            tc.Duration = 1000;
+
+            var col2 = SphereCollider3D.Create(0.5f);
+            col2.Position = node2.Position;
+            tc.Duration = 1000;
+
+            tc.LoopBody(c =>
+            {
+                if (Engine.Collision3DWorld.GetIsCollided(col, col2, out var v, out var v2))
+                {
+                    node.Quaternion = Quaternion.Euler(new Vector3F(c, c, 0));
+                }
+                col.Rotation = node.Quaternion;
+
+                node2.Position += new Vector3F(0.01f, 0, 0);
+                col2.Position = node2.Position;
+
+            }, null);
+
             tc.End();
         }
     }

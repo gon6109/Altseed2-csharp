@@ -102,6 +102,7 @@ namespace Altseed2
                 _tool = Tool.GetInstance();
                 _sound = SoundMixer.GetInstance();
                 _profiler = Profiler.GetInstance();
+                _collision3DWorld = Collision3DWorld.GetInstance();
 
                 _RootNode = new RootNode();
                 _UpdatedNode = _RootNode;
@@ -161,6 +162,9 @@ namespace Altseed2
         public static bool Update()
         {
             if (_WindowSize != Window.Size) UpdateWindowSize();
+
+            if (_collision3DWorld != null)
+                Collision3DWorld.Update();
 
             if (_CameraNodes != null && _Camera3DNodes != null)
             {
@@ -503,6 +507,14 @@ namespace Altseed2
 
         public static Profiler Profiler => _profiler ?? throw new InvalidOperationException("Profiler機能が初期化されていません。");
         private static Profiler _profiler;
+
+        /// <summary>
+        /// Collider3Dを管理するクラスを取得します。
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Profiler機能が初期されていなかったり終了していて操作を実行できなかった</exception>
+
+        public static Collision3DWorld Collision3DWorld => _collision3DWorld ?? throw new InvalidOperationException("Collision3DWorld機能が初期化されていません。");
+        private static Collision3DWorld _collision3DWorld;
 
         #endregion
 

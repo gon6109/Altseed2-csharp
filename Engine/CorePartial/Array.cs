@@ -433,4 +433,62 @@ namespace Altseed2
             });
         }
     }
+
+    internal partial class Vector3FArray : IArray<Vector3F>, ISerializable, ICacheKeeper<Vector3FArray>
+    {
+        #region SerializeName
+        private const string S_Array = "S_Array";
+        #endregion
+
+        /// <inheritdoc/>
+        public Vector3F this[int index]
+        {
+            get { return (0 <= index && index < Count) ? GetAt(index) : throw new IndexOutOfRangeException($"インデックスが無効です\n許容される値：0～{Count - 1}\n実際の値：{index}"); }
+            set
+            {
+                if (index < 0 || Count <= index) throw new IndexOutOfRangeException($"インデックスが無効です\n許容される値：0～{Count - 1}\n実際の値：{index}");
+                SetAt(index, value);
+            }
+        }
+
+        public static Vector3FArray Create(ReadOnlySpan<Vector3F> src)
+        {
+            var dst = Create(src.Length);
+            dst.FromSpan(src);
+            return dst;
+        }
+
+        public static Vector3FArray Create(IEnumerable<Vector3F> src)
+        {
+            var dst = Create(0);
+            dst.FromEnumerable(src);
+            return dst;
+        }
+
+        /// <summary>
+        /// 列挙子を返します。
+        /// </summary>
+        /// <returns>このインスタンスの列挙子</returns>
+        public IEnumerator<Vector3F> GetEnumerator()
+        {
+            var array = this.ToArray();
+            for (int i = 0; i < array.Length; i++) yield return array[i];
+        }
+
+        partial void Deserialize_GetPtr(ref IntPtr ptr, SerializationInfo info)
+        {
+            ptr = cbg_Vector3FArray_Create(info.GetInt32(S_Count));
+        }
+
+        partial void OnGetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(S_Array, this.ToArray());
+        }
+
+        partial void OnDeserialize_Constructor(SerializationInfo info, StreamingContext context)
+        {
+            var array = info.GetValue<Vector3F[]>(S_Array) ?? throw new SerializationException("デシリアライズに失敗しました");
+            this.FromSpan(array);
+        }
+    }
 }

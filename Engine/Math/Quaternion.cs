@@ -188,6 +188,82 @@ namespace Altseed2
             return result;
         }
 
+        /// <summary>
+        /// 回転行列からクオータニオンに変換する
+        /// </summary>
+        /// <returns></returns>
+        public static Quaternion FromMatrix44F(Matrix44F rotation)
+        {
+            Quaternion q = new Quaternion();
+
+            // 最大成分を検索
+            float[] elem = new float[4]; // 0:x, 1:y, 2:z, 3:w
+            elem[0] = rotation[0 ,0] - rotation[1, 1] - rotation[2, 2] + 1.0f;
+            elem[1] = -rotation[0, 0] + rotation[1, 1] - rotation[2, 2] + 1.0f;
+            elem[2] = -rotation[0, 0] - rotation[1, 1] + rotation[2, 2] + 1.0f;
+            elem[3] = rotation[0, 0] + rotation[1, 1] + rotation[2, 2] + 1.0f;
+
+            int biggestIndex = 0;
+            for (int i = 1; i < 4; i++)
+            {
+                if (elem[i] > elem[biggestIndex])
+                    biggestIndex = i;
+            }
+
+            if (elem[biggestIndex] < 0.0f)
+            {
+                Engine.Log.Warn(LogCategory.Engine, "Is not rotation matrix.");
+                return Identity;
+            }
+
+            // 最大要素の値を算出
+            float v = MathF.Sqrt(elem[biggestIndex]) * 0.5f;
+            switch (biggestIndex)
+            {
+                case 0:
+                    q.X = v;
+                    break;
+                case 1:
+                    q.Y = v;
+                    break;
+                case 2:
+                    q.Z = v;
+                    break;
+                case 3:
+                    q.W = v;
+                    break;
+                default:
+                    break;
+            }
+            float mult = 0.25f / v;
+
+            switch (biggestIndex)
+            {
+                case 0: // x
+                    q.Y = (rotation[0, 1] + rotation[1, 0]) * mult;
+                    q.Z = (rotation[2, 0] + rotation[0, 2]) * mult;
+                    q.W = (rotation[1, 2] - rotation[2, 1]) * mult;
+                    break;
+                case 1: // y
+                    q.X = (rotation[0, 1] + rotation[1, 0]) * mult;
+                    q.Z = (rotation[1, 2] + rotation[2, 1]) * mult;
+                    q.W = (rotation[2, 0] - rotation[0, 2]) * mult;
+                    break;
+                case 2: // z
+                    q.X = (rotation[2, 0] + rotation[0, 2]) * mult;
+                    q.Y = (rotation[1, 2] + rotation[2, 1]) * mult;
+                    q.W = (rotation[0, 1] - rotation[1, 0]) * mult;
+                    break;
+                case 3: // w
+                    q.X = (rotation[1, 2] - rotation[2, 1]) * mult;
+                    q.Y = (rotation[2, 0] - rotation[0, 2]) * mult;
+                    q.Z = (rotation[0, 1] - rotation[1, 0]) * mult;
+                    break;
+            }
+
+            return q;
+        }
+
         #endregion
 
     }

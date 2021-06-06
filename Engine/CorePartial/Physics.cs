@@ -55,6 +55,31 @@ namespace Altseed2
             }
         }
         private Matrix44F? _transform;
+
+        public bool GetIsCollidedWith(Collider3D collider, out Vector3F point1, out Vector3F point2)
+        {
+            return Engine.Collision3DWorld.GetIsCollided(this, collider, out point1, out point2);
+        }
+
+        public bool GetIsCollidedWith(Collider3D collider)
+        {
+            return GetIsCollidedWith(collider, out _, out _);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj) || (obj is Collider3D col && col.selfPtr == selfPtr);
+        }
+
+        public static bool operator ==(Collider3D col1, Collider3D col2)
+        {
+            return col1?.Equals(col2) ?? ((object)col1 == null && (object)col2 == null);
+        }
+
+        public static bool operator !=(Collider3D col1, Collider3D col2)
+        {
+            return !(col1 == col2);
+        }
     }
 
     public partial class PointCloudCollider3D : Collider3D

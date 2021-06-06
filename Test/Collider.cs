@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
 using NUnit.Framework;
 
@@ -477,17 +478,17 @@ namespace Altseed2.Test
             node2.AddChildNode(sphere.ToPolygon3DNodeLine(new Color(0, 0, 0, 255)));
             Engine.AddNode(node2);
             node2.Position = new Vector3F(-3, 0, 0);
-
             var col = BoxCollider3D.Create(new Vector3F(1, 0.5f, 1));
-            tc.Duration = 1000;
+            Engine.Collision3DWorld.RegistCollider(col);
 
             var col2 = SphereCollider3D.Create(0.5f);
             col2.Position = node2.Position;
-            tc.Duration = 1000;
+            Engine.Collision3DWorld.RegistCollider(col2);
 
+            tc.Duration = 1000;
             tc.LoopBody(c =>
             {
-                if (Engine.Collision3DWorld.GetIsCollided(col, col2, out var v, out var v2))
+                if (col.GetIsCollidedWith(col2))
                 {
                     node.Quaternion = Quaternion.Euler(new Vector3F(c, c, 0));
                 }
@@ -496,6 +497,57 @@ namespace Altseed2.Test
                 node2.Position += new Vector3F(0.01f, 0, 0);
                 col2.Position = node2.Position;
 
+            }, null);
+
+            tc.End();
+        }
+
+        [Test, Apartment(ApartmentState.STA)]
+        public void Raycast()
+        {
+            var tc = new TestCore(new Configuration() { IsResizable = true });
+            tc.Init();
+
+            var model = Model3D.CreateBox(new Vector3F(1f, 0.5f, 0.7f));
+            var node = model.ToPolygon3DNode(new Color(200, 200, 200));
+            var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+            node.AddChildNode(lighting);
+            node.AddChildNode(model.ToPolygon3DNodeLine(new Color(0, 0, 0, 255)));
+            Engine.AddNode(node);
+            node.Position = new Vector3F();
+
+            var node2 = new Polygon3DNode();
+            node2.Material = Material.Line;
+            Vector3F from = new Vector3F(2, 1, -4);
+            Vector3F to = new Vector3F(-3, 0, 2);
+            var vertexes = new Vertex[]
+            {
+                new Vertex(from, new Vector3F(), new Color(255, 0, 0), new Vector2F(), new Vector2F()),
+                new Vertex(to, new Vector3F(), new Color(255, 0, 0), new Vector2F(), new Vector2F()),
+                new Vertex(from, new Vector3F(), new Color(255, 0, 0), new Vector2F(), new Vector2F())
+            };
+            node2.Vertexes = vertexes;
+            node2.Buffers = new int[] { 0, 1};
+            Engine.AddNode(node2);
+            var col = BoxCollider3D.Create(new Vector3F(1, 0.5f, 1));
+            Engine.Collision3DWorld.RegistCollider(col);
+
+
+            tc.Duration = 1000;
+            tc.LoopBody(c =>
+            {
+                Collider3D collider = Engine.Collision3DWorld.GetRaycastHitClosestCollider(from, to, out var v);
+                if (collider != null)
+                {
+                    Engine.Log.Info(LogCategory.Engine, $"{col == collider} {v}");
+                    node.Quaternion = Quaternion.Euler(new Vector3F(c, c, 0));
+                }
+                col.Rotation = node.Quaternion;
+
+                vertexes[0] = new Vertex(from, new Vector3F(), new Color(255, 0, 0), new Vector2F(), new Vector2F());
+                vertexes[1] = new Vertex(to, new Vector3F(), new Color(255, 0, 0), new Vector2F(), new Vector2F());
+                node2.SetVertexes(vertexes.AsSpan(), false);
+                to += new Vector3F(0.01f, 0, 0);
             }, null);
 
             tc.End();

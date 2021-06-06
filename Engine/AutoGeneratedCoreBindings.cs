@@ -14018,6 +14018,18 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern IntPtr cbg_Collision3DWorld_GetRaycastHitClosestCollider(IntPtr selfPtr, Vector3F rayFrom, Vector3F rayTo, [Out] out float fraction);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collision3DWorld_RegistCollider(IntPtr selfPtr, IntPtr collider);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collision3DWorld_UnregistCollider(IntPtr selfPtr, IntPtr collider);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_Collision3DWorld_Release(IntPtr selfPtr);
         
         #endregion
@@ -14043,6 +14055,22 @@ namespace Altseed2
         {
             var ret = cbg_Collision3DWorld_GetIsCollided(selfPtr, collider1 != null ? collider1.selfPtr : IntPtr.Zero, collider2 != null ? collider2.selfPtr : IntPtr.Zero, out point1, out point2);
             return ret;
+        }
+        
+        public Collider3D GetRaycastHitClosestCollider(Vector3F rayFrom, Vector3F rayTo, out float fraction)
+        {
+            var ret = cbg_Collision3DWorld_GetRaycastHitClosestCollider(selfPtr, rayFrom, rayTo, out fraction);
+            return Collider3D.TryGetFromCache(ret);
+        }
+        
+        public void RegistCollider(Collider3D collider)
+        {
+            cbg_Collision3DWorld_RegistCollider(selfPtr, collider != null ? collider.selfPtr : IntPtr.Zero);
+        }
+        
+        public void UnregistCollider(Collider3D collider)
+        {
+            cbg_Collision3DWorld_UnregistCollider(selfPtr, collider != null ? collider.selfPtr : IntPtr.Zero);
         }
         
         /// <summary>
@@ -14100,16 +14128,6 @@ namespace Altseed2
         internal IntPtr selfPtr = IntPtr.Zero;
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [return: MarshalAs(UnmanagedType.U1)]
-        private static extern bool cbg_Collider3D_GetIsCollidedWith_Collider3D(IntPtr selfPtr, IntPtr collider);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [return: MarshalAs(UnmanagedType.U1)]
-        private static extern bool cbg_Collider3D_GetIsCollidedWith_Collider3D_Vector3F_Cp_Vector3F_Cp(IntPtr selfPtr, IntPtr collider, [Out] out Vector3F point1, [Out] out Vector3F point2);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern Vector3F cbg_Collider3D_GetPosition(IntPtr selfPtr);
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -14142,18 +14160,6 @@ namespace Altseed2
         internal Collider3D(MemoryHandle handle)
         {
             selfPtr = handle.selfPtr;
-        }
-        
-        public bool GetIsCollidedWith(Collider3D collider)
-        {
-            var ret = cbg_Collider3D_GetIsCollidedWith_Collider3D(selfPtr, collider != null ? collider.selfPtr : IntPtr.Zero);
-            return ret;
-        }
-        
-        public bool GetIsCollidedWith(Collider3D collider, out Vector3F point1, out Vector3F point2)
-        {
-            var ret = cbg_Collider3D_GetIsCollidedWith_Collider3D_Vector3F_Cp_Vector3F_Cp(selfPtr, collider != null ? collider.selfPtr : IntPtr.Zero, out point1, out point2);
-            return ret;
         }
         
         /// <summary>

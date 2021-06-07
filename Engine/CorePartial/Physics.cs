@@ -80,6 +80,11 @@ namespace Altseed2
         {
             return !(col1 == col2);
         }
+
+        public override int GetHashCode()
+        {
+            return selfPtr.GetHashCode();
+        }
     }
 
     public partial class PointCloudCollider3D : Collider3D

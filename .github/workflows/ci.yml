@@ -44,35 +44,6 @@ jobs:
       with:
         name: test-windows
         path: Build
-  
-  test:
-    runs-on: windows-latest
-    needs: [windows]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Update Submodules
-        run: |
-          git submodule update --init
-          
-      - name: Download Windows
-        uses: actions/download-artifact@v1
-        with:
-          name: test-windows
-      - name: Test
-        run: |
-          cd test-windows/CI/net5.0
-          ./TestForMacLinux.exe
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: test-result
-          path: test-windows/CI/net5.0
-
-      - name: Compare tests
-        run: |
-          cd Scripts
-          python test_screenshot.py
 
   linux:
     runs-on: ubuntu-18.04

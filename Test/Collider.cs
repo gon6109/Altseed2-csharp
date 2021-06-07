@@ -488,14 +488,16 @@ namespace Altseed2.Test
             tc.Duration = 1000;
             tc.LoopBody(c =>
             {
+                node2.Position += new Vector3F(0.01f, 0, 0);
+                col2.Position = node2.Position;
+
+                Engine.Collision3DWorld.Update();
+
                 if (col.GetIsCollidedWith(col2))
                 {
                     node.Quaternion = Quaternion.Euler(new Vector3F(c, c, 0));
                 }
                 col.Rotation = node.Quaternion;
-
-                node2.Position += new Vector3F(0.01f, 0, 0);
-                col2.Position = node2.Position;
 
             }, null);
 
@@ -536,6 +538,7 @@ namespace Altseed2.Test
             tc.Duration = 1000;
             tc.LoopBody(c =>
             {
+                Engine.Collision3DWorld.Update();
                 Collider3D collider = Engine.Collision3DWorld.GetRaycastHitClosestCollider(from, to, out var v);
                 if (collider != null)
                 {

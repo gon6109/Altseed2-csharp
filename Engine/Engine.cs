@@ -163,9 +163,6 @@ namespace Altseed2
         {
             if (_WindowSize != Window.Size) UpdateWindowSize();
 
-            if (_collision3DWorld != null)
-                Collision3DWorld.Update();
-
             if (_CameraNodes != null && _Camera3DNodes != null)
             {
                 var anyCamera = _CameraNodes.Count != 0;

@@ -14152,6 +14152,14 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern float cbg_Collider3D_GetMargin(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Collider3D_SetMargin(IntPtr selfPtr, float value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_Collider3D_Release(IntPtr selfPtr);
         
         #endregion
@@ -14161,6 +14169,25 @@ namespace Altseed2
         {
             selfPtr = handle.selfPtr;
         }
+        
+        public float Margin
+        {
+            get
+            {
+                if (_Margin != null)
+                {
+                    return _Margin.Value;
+                }
+                var ret = cbg_Collider3D_GetMargin(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _Margin = value;
+                cbg_Collider3D_SetMargin(selfPtr, value);
+            }
+        }
+        private float? _Margin;
         
         /// <summary>
         /// <see cref="Collider3D"/>のインスタンスを削除します。

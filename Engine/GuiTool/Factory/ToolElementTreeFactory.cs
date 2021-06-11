@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Altseed2.GuiTool.Factory;
-using Altseed2.GuiTool.Repository;
 
 namespace Altseed2
 {

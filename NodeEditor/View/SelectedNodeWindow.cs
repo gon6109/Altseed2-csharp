@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Altseed2.GuiTool.Factory;
 
 namespace Altseed2.NodeEditor.View
 {

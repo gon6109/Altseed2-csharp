@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Reflection;
 
-namespace Altseed2.GuiTool.Factory
+namespace Altseed2
 {
     internal class ToolElementFactory
     {
@@ -32,8 +32,8 @@ namespace Altseed2.GuiTool.Factory
             if (info.PropertyType == typeof(float))
                 return new FloatToolElement(info.Name, source, info.Name);
 
-            if (info.PropertyType == typeof(Font))
-                return new FontToolElement(info.Name, source, info.Name);
+            // if (info.PropertyType == typeof(Font))
+            //     return new FontToolElement(info.Name, source, info.Name);
 
             if (info.PropertyType == typeof(string))
             {
@@ -48,8 +48,8 @@ namespace Altseed2.GuiTool.Factory
             if (info.PropertyType == typeof(IList))
                 return new ListToolElement(info.Name, source, info.Name);
             
-            if (info.PropertyType == typeof(TextureBase))
-                return new TextureBaseToolElement(info.Name, source, info.Name);
+            // if (info.PropertyType == typeof(TextureBase))
+            //     return new TextureBaseToolElement(info.Name, source, info.Name);
 
             if (info.PropertyType == typeof(Vector2F))
                 return new Vector2FToolElement(info.Name, source, info.Name);
@@ -67,7 +67,7 @@ namespace Altseed2.GuiTool.Factory
                 ToolColorAttribute toolColorAttribute => new ColorToolElement(elementName, source, info.Name, toolColorAttribute.Flags),
                 ToolEnumAttribute _ => new EnumToolElement(elementName, source, info.Name),
                 ToolFloatAttribute toolFloatAttribute => new FloatToolElement(elementName, source, info.Name, toolFloatAttribute.Speed, toolFloatAttribute.Min, toolFloatAttribute.Max),
-                ToolFontAttribute _ => new FontToolElement(elementName, source, info.Name),
+                // ToolFontAttribute _ => new FontToolElement(elementName, source, info.Name),
                 ToolGroupAttribute _ => new GroupToolElement(elementName, source, info.Name, _toolElementTreeFactory),
                 ToolInputTextAttribute toolInputTextAttribute => new InputTextToolElement(elementName, source, info.Name, toolInputTextAttribute.IsMultiLine, toolInputTextAttribute.MaxLength),
                 ToolIntAttribute toolIntAttribute => new IntToolElement(elementName, source, info.Name, toolIntAttribute.Speed, toolIntAttribute.Min, toolIntAttribute.Max),
@@ -87,7 +87,7 @@ namespace Altseed2.GuiTool.Factory
                     toolPathAttribute.DefaultPath,
                     toolPathAttribute.MaxLength,
                     toolPathAttribute.RootDirectoryPathPropertyName),
-                ToolTextureBaseAttribute _ => new TextureBaseToolElement(elementName, source, info.Name),
+                // ToolTextureBaseAttribute _ => new TextureBaseToolElement(elementName, source, info.Name),
                 ToolVector2FAttribute toolVector2FAttribute => new Vector2FToolElement(elementName, source, info.Name, toolVector2FAttribute.Speed, toolVector2FAttribute.Min, toolVector2FAttribute.Max),
                 _ => null,
             };
@@ -118,8 +118,8 @@ namespace Altseed2.GuiTool.Factory
                 ToolElementType.Path => PathToolElement.Create(source, guiInfo),
                 ToolElementType.Vector2F => Vector2FToolElement.Create(source, guiInfo),
                 ToolElementType.Float => FloatToolElement.Create(source, guiInfo),
-                ToolElementType.TextureBase => TextureBaseToolElement.Create(source, guiInfo),
-                ToolElementType.Font => FontToolElement.Create(source, guiInfo),
+                // ToolElementType.TextureBase => TextureBaseToolElement.Create(source, guiInfo),
+                // ToolElementType.Font => FontToolElement.Create(source, guiInfo),
                 ToolElementType.Enum => EnumToolElement.Create(source, guiInfo),
                 ToolElementType.Button => ButtonToolElement.Create(source, guiInfo),
                 ToolElementType.User => UserToolElement.Create(source, guiInfo),

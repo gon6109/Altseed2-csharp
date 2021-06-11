@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Altseed2.GuiTool.Repository
+namespace Altseed2
 {
     public sealed class GuiInfoRepository
     {

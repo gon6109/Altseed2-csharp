@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Altseed2.GuiTool.Repository;
 
-namespace Altseed2.GuiTool.Factory
+namespace Altseed2
 {
     public interface IToolElementTreeFactory
     {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Altseed2.GuiTool.Factory;
 
 namespace Altseed2
 {

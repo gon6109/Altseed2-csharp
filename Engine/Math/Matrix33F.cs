@@ -43,15 +43,15 @@ namespace Altseed2
             {
                 var result = Identity;
 
-                var a11 = result.Values[0 * 3 + 0];
-                var a12 = result.Values[0 * 3 + 1];
-                var a13 = result.Values[0 * 3 + 2];
-                var a21 = result.Values[1 * 3 + 0];
-                var a22 = result.Values[1 * 3 + 1];
-                var a23 = result.Values[1 * 3 + 2];
-                var a31 = result.Values[2 * 3 + 0];
-                var a32 = result.Values[2 * 3 + 1];
-                var a33 = result.Values[2 * 3 + 2];
+                var a11 = this[0, 0];
+                var a12 = this[0, 1];
+                var a13 = this[0, 2];
+                var a21 = this[1, 0];
+                var a22 = this[1, 1];
+                var a23 = this[1, 2];
+                var a31 = this[2, 0];
+                var a32 = this[2, 1];
+                var a33 = this[2, 2];
 
                 /* 行列式の計算 */
                 var b11 = +a22 * a33 - a23 * a32;
@@ -72,15 +72,15 @@ namespace Altseed2
 
                 var InvDet = 1.0f / Det;
 
-                result.Values[0 * 3 + 0] = b11 * InvDet;
-                result.Values[0 * 3 + 1] = b12 * InvDet;
-                result.Values[0 * 3 + 2] = b13 * InvDet;
-                result.Values[1 * 3 + 0] = b21 * InvDet;
-                result.Values[1 * 3 + 1] = b22 * InvDet;
-                result.Values[1 * 3 + 2] = b23 * InvDet;
-                result.Values[2 * 3 + 0] = b31 * InvDet;
-                result.Values[2 * 3 + 1] = b32 * InvDet;
-                result.Values[2 * 3 + 2] = b33 * InvDet;
+                result[0, 0] = b11 * InvDet;
+                result[0, 1] = b12 * InvDet;
+                result[0, 2] = b13 * InvDet;
+                result[1, 0] = b21 * InvDet;
+                result[1, 1] = b22 * InvDet;
+                result[1, 2] = b23 * InvDet;
+                result[2, 0] = b31 * InvDet;
+                result[2, 1] = b32 * InvDet;
+                result[2, 2] = b33 * InvDet;
 
                 return result;
             }

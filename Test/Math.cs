@@ -109,6 +109,60 @@ namespace Altseed2.Test
             TestValue(mat, qmat);
         }
 
+        [Test]
+        public void Inverse()
+        {
+            var mat = new Matrix33F();
+            mat[0, 0] = 1;
+            mat[1, 0] = 2;
+            mat[2, 0] = 1;
+            mat[0, 1] = 2;
+            mat[1, 1] = 1;
+            mat[2, 1] = 1;
+            mat[0, 2] = 1;
+            mat[1, 2] = 0;
+            mat[2, 2] = 2;
+            var ans = new Matrix33F();
+            ans[0, 0] = -0.4f;
+            ans[1, 0] = 0.8f;
+            ans[2, 0] = -0.2f;
+            ans[0, 1] = 0.6f;
+            ans[1, 1] = -0.2f;
+            ans[2, 1] = -0.2f;
+            ans[0, 2] = 0.2f;
+            ans[1, 2] = -0.4f;
+            ans[2, 2] = 0.6f;
+            var matinv = mat.Inversion;
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    InRange(matinv[x, y], ans[x, y], 0.01f);
+                }
+            }
+            var i = mat * matinv;
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    InRange(i[x, y], Matrix33F.Identity[x, y], 0.01f);
+                }
+            }
+            var matinvinv = matinv.Inversion;
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    InRange(matinvinv[x, y], mat[x, y], 0.01f);
+                }
+            }
+        }
+
+        static void InRange(float actual, float target, float eps)
+        {
+            Assert.LessOrEqual(actual, target + eps);
+            Assert.GreaterOrEqual(actual, target - eps);
+        }
 
         public static void TestValue(float left, float right)
         {

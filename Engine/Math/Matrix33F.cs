@@ -35,6 +35,22 @@ namespace Altseed2
         }
 
         /// <summary>
+        /// 行列式を取得します
+        /// </summary>
+        public readonly float Determinant
+        {
+            get
+            {
+                return this[0, 0] * this[1, 1] * this[2, 2]
+                + this[0, 1] * this[1, 2] * this[2, 0]
+                + this[0, 2] * this[1, 0] * this[2, 1]
+                - this[0, 2] * this[1, 1] * this[2, 0]
+                - this[0, 1] * this[1, 0] * this[2, 2]
+                - this[0, 0] * this[1, 2] * this[2, 1];
+            }
+        }
+
+        /// <summary>
         /// 逆行列を取得します。
         /// </summary>
         public readonly Matrix33F Inversion
@@ -67,7 +83,7 @@ namespace Altseed2
                 var b33 = +a11 * a22 - a12 * a21;
 
                 // 行列式の逆数をかける
-                var Det = a11 * a22 * a33 + a21 * a32 * a13 + a31 * a12 * a23 - a11 * a32 * a23 - a31 * a22 * a13 - a21 * a12 * a33;
+                var Det = Determinant;
                 if ((-MathHelper.MatrixError <= Det) && (Det <= +MathHelper.MatrixError)) throw new InvalidOperationException("逆行列が存在しません。");
 
                 var InvDet = 1.0f / Det;

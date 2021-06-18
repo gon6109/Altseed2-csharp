@@ -16,7 +16,7 @@ namespace Altseed2
         /// 行列で使用
         /// 誤差
         /// </summary>
-        internal const float MatrixError = 0.0001f;
+        internal const float MatrixError = 1-10f;
 
         /// <summary>
         /// 指定した値を決められた範囲に丸めます。

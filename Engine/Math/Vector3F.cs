@@ -197,6 +197,17 @@ namespace Altseed2
             return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
         }
 
+        /// <summary>
+        /// 2つの<see cref="Vector3F"/>のなす角を取得します．
+        /// </summary>
+        /// <param name="v1">v1ベクトル</param>
+        /// <param name="v2">v2ベクトル</param>
+        /// <returns>v1とv2のなす角</returns>
+        public static float Angle(Vector3F v1, Vector3F v2)
+        {
+            return MathHelper.RadianToDegree(MathF.Acos(Dot(v1, v2) / (v1.Length * v2.Length)));
+        }
+
         #region CalOperators
         /// <summary>
         /// 2つのベクトルを加算します。

@@ -41,6 +41,33 @@ namespace Altseed2
         }
 
         /// <summary>
+        /// fromDirection から toDirection への回転を作成します。
+        /// </summary>
+        /// <param name="fromDirection"></param>
+        /// <param name="toDirection"></param>
+        /// <returns></returns>
+        public static Quaternion FromToRotation(Vector3F fromDirection, Vector3F toDirection)
+        {
+            Vector3F axis = Vector3F.Cross(fromDirection, toDirection);
+            float angle = Vector3F.Angle(fromDirection, toDirection);
+            return AngleAxis(angle, axis.Normal);
+        }
+
+        /// <summary>
+        /// axis の周りを angle 度回転する回転を作成します。
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <param name="axis"></param>
+        /// <returns></returns>
+        public static Quaternion AngleAxis(float angle, Vector3F axis)
+        {
+            axis.Normalize();
+            float rad = MathHelper.DegreeToRadian(angle) * 0.5f;
+            axis *= MathF.Sin(rad);
+            return new Quaternion(MathF.Cos(rad), axis.X, axis.Y, axis.Z);
+        }
+
+        /// <summary>
         /// W成分
         /// </summary>
         [MarshalAs(UnmanagedType.R4)]
@@ -171,7 +198,7 @@ namespace Altseed2
         {
             var num = rotation.X * 2;
             var num2 = rotation.Y * 2;
-            var  num3 = rotation.Z * 2;
+            var num3 = rotation.Z * 2;
             var num4 = rotation.X * num;
             var num5 = rotation.Y * num2;
             var num6 = rotation.Z * num3;
@@ -198,7 +225,7 @@ namespace Altseed2
 
             // 最大成分を検索
             float[] elem = new float[4]; // 0:x, 1:y, 2:z, 3:w
-            elem[0] = rotation[0 ,0] - rotation[1, 1] - rotation[2, 2] + 1.0f;
+            elem[0] = rotation[0, 0] - rotation[1, 1] - rotation[2, 2] + 1.0f;
             elem[1] = -rotation[0, 0] + rotation[1, 1] - rotation[2, 2] + 1.0f;
             elem[2] = -rotation[0, 0] - rotation[1, 1] + rotation[2, 2] + 1.0f;
             elem[3] = rotation[0, 0] + rotation[1, 1] + rotation[2, 2] + 1.0f;

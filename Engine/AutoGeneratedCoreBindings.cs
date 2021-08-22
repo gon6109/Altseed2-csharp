@@ -10816,7 +10816,7 @@ namespace Altseed2
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         [return: MarshalAs(UnmanagedType.U1)]
-        private static extern bool cbg_MediaPlayer_WriteToTexture2D(IntPtr selfPtr, IntPtr target);
+        private static extern bool cbg_MediaPlayer_WriteToRenderTexture(IntPtr selfPtr, IntPtr target);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -10882,9 +10882,9 @@ namespace Altseed2
         /// 現在の映像のフレームをテクスチャに書き込みます。映像とテクスチャは同じサイズである必要があります。
         /// </summary>
         /// <param name="target">テクスチャ</param>
-        public bool WriteToTexture2D(Texture2D target)
+        public bool WriteToRenderTexture(RenderTexture target)
         {
-            var ret = cbg_MediaPlayer_WriteToTexture2D(selfPtr, target != null ? target.selfPtr : IntPtr.Zero);
+            var ret = cbg_MediaPlayer_WriteToRenderTexture(selfPtr, target != null ? target.selfPtr : IntPtr.Zero);
             return ret;
         }
         

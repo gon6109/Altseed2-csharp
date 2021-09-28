@@ -145,6 +145,17 @@ namespace Altseed2
     /// 
     /// </summary>
     [Serializable]
+    public enum CullingMode : int
+    {
+        Clockwise = 0,
+        CounterClockwise = 1,
+        DoubleSide = 2,
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
     public enum BlendEquation : int
     {
         Add = 0,
@@ -4613,6 +4624,32 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern int cbg_Material_GetCullingMode(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Material_SetCullingMode(IntPtr selfPtr, int value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Material_GetIsDepthWriteEnabled(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Material_SetIsDepthWriteEnabled(IntPtr selfPtr, [MarshalAs(UnmanagedType.Bool)] bool value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool cbg_Material_GetIsDepthTestEnabled(IntPtr selfPtr);
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Material_SetIsDepthTestEnabled(IntPtr selfPtr, [MarshalAs(UnmanagedType.Bool)] bool value);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern IntPtr cbg_Material_GetPropertyBlock(IntPtr selfPtr);
         
         
@@ -4676,6 +4713,63 @@ namespace Altseed2
             }
         }
         private TopologyType? _TopologyType;
+        
+        public CullingMode CullingMode
+        {
+            get
+            {
+                if (_CullingMode != null)
+                {
+                    return _CullingMode.Value;
+                }
+                var ret = cbg_Material_GetCullingMode(selfPtr);
+                return (CullingMode)ret;
+            }
+            set
+            {
+                _CullingMode = value;
+                cbg_Material_SetCullingMode(selfPtr, (int)value);
+            }
+        }
+        private CullingMode? _CullingMode;
+        
+        public bool IsDepthWriteEnabled
+        {
+            get
+            {
+                if (_IsDepthWriteEnabled != null)
+                {
+                    return _IsDepthWriteEnabled.Value;
+                }
+                var ret = cbg_Material_GetIsDepthWriteEnabled(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _IsDepthWriteEnabled = value;
+                cbg_Material_SetIsDepthWriteEnabled(selfPtr, value);
+            }
+        }
+        private bool? _IsDepthWriteEnabled;
+        
+        public bool IsDepthTestEnabled
+        {
+            get
+            {
+                if (_IsDepthTestEnabled != null)
+                {
+                    return _IsDepthTestEnabled.Value;
+                }
+                var ret = cbg_Material_GetIsDepthTestEnabled(selfPtr);
+                return ret;
+            }
+            set
+            {
+                _IsDepthTestEnabled = value;
+                cbg_Material_SetIsDepthTestEnabled(selfPtr, value);
+            }
+        }
+        private bool? _IsDepthTestEnabled;
         
         public MaterialPropertyBlock PropertyBlock
         {

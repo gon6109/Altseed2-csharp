@@ -946,5 +946,65 @@ float4 main(PS_INPUT input) : SV_TARGET
 
             tc.End();
         }
+
+        [Test, Apartment(ApartmentState.STA)]
+        public void Model3DBunnyWithMaterial()
+        {
+            var tc = new TestCore();
+            tc.Init();
+
+            var screen = RenderTexture.Create(Engine.WindowSize, TextureFormat.R8G8B8A8_UNORM, true);
+            var camera = new Camera3DNode();
+            camera.Group = 1;
+            camera.TargetTexture = screen;
+            Engine.AddNode(camera);
+
+            var deer = new Transform3DNode();
+
+            foreach (var node in Model3D.LoadObjFile(@"TestData/test2.obj").Select(model => model.ToPolygon3DNode(new Color(200, 200, 200))))
+            {
+                deer.AddChildNode(node);
+                var lighting = new DirectionalLightingNode() { LightDirection = new Vector3F(0, -1, 1) };
+                node.CameraGroup = 1;
+                node.AddChildNode(lighting);
+            }
+
+            deer.Scale *= 0.005f;
+            deer.Position = new Vector3F(0, 0, 0f);
+            Engine.AddNode(deer);
+
+            var node2 = new SpriteNode();
+            node2.Texture = screen;
+            node2.ZOrder = 1;
+
+            node2.Material = Material.Create();
+
+            var psCode = @"
+Texture2D mainTex : register(t0);
+Texture2D mainTex_depth : register(t1);
+SamplerState mainSamp : register(s0);
+SamplerState mainSampDepth : register(s1);
+struct PS_INPUT
+{
+    float4  Position : SV_POSITION;
+    float4  Color    : COLOR0;
+    float4  Normal : NORMAL0;
+    float2  UV1 : UV0;
+    float2  UV2 : UV1;
+};
+float4 main(PS_INPUT input) : SV_TARGET
+{
+    float4 c;
+    c = mainTex_depth.Sample(mainSampDepth, input.UV1).rrrr;
+    return c;
+}";
+            node2.Material.SetShader(Shader.Create("ps", psCode, ShaderStage.Pixel));
+            node2.Material.SetTexture("mainTex", screen);
+            Engine.AddNode(node2);
+
+            tc.LoopBody(null, null);
+
+            tc.End();
+        }
     }
 }

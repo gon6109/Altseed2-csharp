@@ -195,32 +195,32 @@ namespace Altseed2
                 if (!_graphics.BeginFrame(new RenderPassParameter(ClearColor, true, true))) return false;
             }
 
+            if (drawDefaultCamera3DGroup)
+            {
+                DrawCamera3DGroup(_DefaultCamera3D, _Drawn3DCollection.GetDrawns());
+            }
+
             if (drawDefaultCameraGroup)
             {
                 // カメラが 1 つもない場合はデフォルトカメラを使用
                 DrawCameraGroup(_DefaultCamera, _DrawnCollection.GetDrawns());
             }
 
-            if (drawDefaultCamera3DGroup)
-            {
-                DrawCamera3DGroup(_DefaultCamera3D, _Drawn3DCollection.GetDrawns());
-            }
-
             // 特定のカメラに映りこむノードを描画
             for (int i = 0; i < MaxCameraGroupCount; i++)
             {
-                if (drawCustomCameraGroup)
-                {
-                    foreach (var camera in _CameraNodes[i])
-                    {
-                        DrawCameraGroup(camera.RenderedCamera, _DrawnCollection[i]);
-                    }
-                }
                 if (drawCustomCamera3DGroup)
                 {
                     foreach (var camera in _Camera3DNodes[i])
                     {
                         DrawCamera3DGroup(camera.RenderedCamera, _Drawn3DCollection[i]);
+                    }
+                }
+                if (drawCustomCameraGroup)
+                {
+                    foreach (var camera in _CameraNodes[i])
+                    {
+                        DrawCameraGroup(camera.RenderedCamera, _DrawnCollection[i]);
                     }
                 }
             }

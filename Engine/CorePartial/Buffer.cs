@@ -76,12 +76,12 @@ namespace Altseed2
         /// バッファから値を取得します
         /// </summary>
         /// <returns></returns>
-        public Span<T> Read()
+        public ReadOnlySpan<T> Read()
         {
             unsafe
             {
-                var readback = new Span<T>(InternalBuffer.Read().ToPointer(), Count);
-                return readback.ToArray();
+                var readback = new ReadOnlySpan<T>(InternalBuffer.Read().ToPointer(), Count);
+                return readback;
             }
         }
     }

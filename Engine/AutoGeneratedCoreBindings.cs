@@ -168,10 +168,10 @@ namespace Altseed2
     [Serializable]
     public enum BufferUsageType : int
     {
-        Index = 0,
-        Vertex = 1,
-        Constant = 2,
-        Compute = 3,
+        Index = 1,
+        Vertex = 2,
+        Constant = 4,
+        Compute = 8,
     }
     
     /// <summary>
@@ -4766,7 +4766,7 @@ namespace Altseed2
     /// <summary>
     /// 
     /// </summary>
-    public partial class Buffer
+    internal partial class Buffer
     {
         #region unmanaged
         
@@ -5123,14 +5123,6 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_CommandList_StartFrame(IntPtr selfPtr, RenderPassParameter renderPassParameter);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_CommandList_EndFrame(IntPtr selfPtr);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_CommandList_EndRenderPass(IntPtr selfPtr);
         
         [DllImport("Altseed2_Core")]
@@ -5167,6 +5159,10 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_CommandList_Draw(IntPtr selfPtr, int instanceCount);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_CommandList_SetVertexBuffer(IntPtr selfPtr, IntPtr vb, int stride, int offset);
         
         [DllImport("Altseed2_Core")]
@@ -5183,11 +5179,23 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_CommandList_SetComputeBuffer(IntPtr selfPtr, IntPtr buffer, int stride, int unit);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_CommandList_Dispatch(IntPtr selfPtr, int x, int y, int z);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_CommandList_CopyTexture(IntPtr selfPtr, IntPtr src, IntPtr dst);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_CommandList_ResetTextures(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_CommandList_ResetComputeBuffers(IntPtr selfPtr);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -5214,11 +5222,6 @@ namespace Altseed2
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_CommandList_SetMaterial(IntPtr selfPtr, IntPtr value);
-        
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_CommandList_SetComputeBuffer(IntPtr selfPtr, IntPtr value);
         
         
         [DllImport("Altseed2_Core")]
@@ -5277,22 +5280,6 @@ namespace Altseed2
         }
         private TextureFormat? _ScreenTextureFormat;
         
-        public Material Material
-        {
-            set
-            {
-                cbg_CommandList_SetMaterial(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
-            }
-        }
-        
-        public Buffer ComputeBuffer
-        {
-            set
-            {
-                cbg_CommandList_SetComputeBuffer(selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
-            }
-        }
-        
         public ComputePipelineState ComputePipelineState
         {
             set
@@ -5317,16 +5304,6 @@ namespace Altseed2
             cbg_CommandList_End(selfPtr);
         }
         
-        public void StartFrame(RenderPassParameter renderPassParameter)
-        {
-            cbg_CommandList_StartFrame(selfPtr, renderPassParameter);
-        }
-        
-        public void EndFrame()
-        {
-            cbg_CommandList_EndFrame(selfPtr);
-        }
-        
         public void EndRenderPass()
         {
             cbg_CommandList_EndRenderPass(selfPtr);
@@ -5342,17 +5319,17 @@ namespace Altseed2
             cbg_CommandList_ResumeRenderPass(selfPtr);
         }
         
-        public void UploadBuffer(Buffer buffer)
+        internal void UploadBuffer(Buffer buffer)
         {
             cbg_CommandList_UploadBuffer(selfPtr, buffer != null ? buffer.selfPtr : IntPtr.Zero);
         }
         
-        public void ReadbackBuffer(Buffer buffer)
+        internal void ReadbackBuffer(Buffer buffer)
         {
             cbg_CommandList_ReadbackBuffer(selfPtr, buffer != null ? buffer.selfPtr : IntPtr.Zero);
         }
         
-        public void CopyBuffer(Buffer src, Buffer dst)
+        internal void CopyBuffer(Buffer src, Buffer dst)
         {
             cbg_CommandList_CopyBuffer(selfPtr, src != null ? src.selfPtr : IntPtr.Zero, dst != null ? dst.selfPtr : IntPtr.Zero);
         }
@@ -5386,12 +5363,17 @@ namespace Altseed2
             cbg_CommandList_RenderToRenderTarget(selfPtr, material != null ? material.selfPtr : IntPtr.Zero);
         }
         
-        public void SetVertexBuffer(Buffer vb, int stride, int offset)
+        public void Draw(int instanceCount)
+        {
+            cbg_CommandList_Draw(selfPtr, instanceCount);
+        }
+        
+        internal void SetVertexBuffer(Buffer vb, int stride, int offset)
         {
             cbg_CommandList_SetVertexBuffer(selfPtr, vb != null ? vb.selfPtr : IntPtr.Zero, stride, offset);
         }
         
-        public void SetIndexBuffer(Buffer ib, int stride, int offset)
+        internal void SetIndexBuffer(Buffer ib, int stride, int offset)
         {
             cbg_CommandList_SetIndexBuffer(selfPtr, ib != null ? ib.selfPtr : IntPtr.Zero, stride, offset);
         }
@@ -5404,6 +5386,11 @@ namespace Altseed2
         public void EndComputePass()
         {
             cbg_CommandList_EndComputePass(selfPtr);
+        }
+        
+        internal void SetComputeBuffer(Buffer buffer, int stride, int unit)
+        {
+            cbg_CommandList_SetComputeBuffer(selfPtr, buffer != null ? buffer.selfPtr : IntPtr.Zero, stride, unit);
         }
         
         public void Dispatch(int x, int y, int z)
@@ -5422,6 +5409,16 @@ namespace Altseed2
             if (src == null) throw new ArgumentNullException(nameof(src), "引数がnullです");
             if (dst == null) throw new ArgumentNullException(nameof(dst), "引数がnullです");
             cbg_CommandList_CopyTexture(selfPtr, src != null ? src.selfPtr : IntPtr.Zero, dst != null ? dst.selfPtr : IntPtr.Zero);
+        }
+        
+        public void ResetTextures()
+        {
+            cbg_CommandList_ResetTextures(selfPtr);
+        }
+        
+        public void ResetComputeBuffers()
+        {
+            cbg_CommandList_ResetComputeBuffers(selfPtr);
         }
         
         public void SaveRenderTexture(string path, RenderTexture texture)
@@ -6772,7 +6769,7 @@ namespace Altseed2
         internal IntPtr selfPtr = IntPtr.Zero;
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern IntPtr cbg_ComputePipelineState_Create(IntPtr selfPtr);
+        private static extern IntPtr cbg_ComputePipelineState_Create();
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -6792,50 +6789,10 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern IntPtr cbg_ComputePipelineState_GetTexture(IntPtr selfPtr, [MarshalAs(UnmanagedType.LPWStr)] string key);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_ComputePipelineState_SetTexture(IntPtr selfPtr, [MarshalAs(UnmanagedType.LPWStr)] string key, IntPtr value);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern IntPtr cbg_ComputePipelineState_GetVertexLayoutName(IntPtr selfPtr, int index);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_ComputePipelineState_SetVertexLayoutName(IntPtr selfPtr, int index, [MarshalAs(UnmanagedType.LPWStr)] string name);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern int cbg_ComputePipelineState_GetVertexLayoutFormat(IntPtr selfPtr, int index);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_ComputePipelineState_SetVertexLayoutFormat(IntPtr selfPtr, int index, int format);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern int cbg_ComputePipelineState_GetVertexLayoutSemasntics(IntPtr selfPtr, int index);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_ComputePipelineState_SetVertexLayoutSemasntics(IntPtr selfPtr, int index, int semantics);
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern IntPtr cbg_ComputePipelineState_GetShader(IntPtr selfPtr);
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_ComputePipelineState_SetShader(IntPtr selfPtr, IntPtr value);
-        
-        
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern int cbg_ComputePipelineState_GetVertexLayoutCount(IntPtr selfPtr);
-        [DllImport("Altseed2_Core")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_ComputePipelineState_SetVertexLayoutCount(IntPtr selfPtr, int value);
         
         
         [DllImport("Altseed2_Core")]
@@ -6874,25 +6831,6 @@ namespace Altseed2
         }
         private Shader _Shader;
         
-        public int VertexLayoutCount
-        {
-            get
-            {
-                if (_VertexLayoutCount != null)
-                {
-                    return _VertexLayoutCount.Value;
-                }
-                var ret = cbg_ComputePipelineState_GetVertexLayoutCount(selfPtr);
-                return ret;
-            }
-            set
-            {
-                _VertexLayoutCount = value;
-                cbg_ComputePipelineState_SetVertexLayoutCount(selfPtr, value);
-            }
-        }
-        private int? _VertexLayoutCount;
-        
         public MaterialPropertyBlock PropertyBlock
         {
             get
@@ -6902,9 +6840,9 @@ namespace Altseed2
             }
         }
         
-        public ComputePipelineState Create()
+        public static ComputePipelineState Create()
         {
-            var ret = cbg_ComputePipelineState_Create(selfPtr);
+            var ret = cbg_ComputePipelineState_Create();
             return ComputePipelineState.TryGetFromCache(ret);
         }
         
@@ -6928,50 +6866,6 @@ namespace Altseed2
         public void SetMatrix44F(string key, Matrix44F value)
         {
             cbg_ComputePipelineState_SetMatrix44F(selfPtr, key, value);
-        }
-        
-        public TextureBase GetTexture(string key)
-        {
-            var ret = cbg_ComputePipelineState_GetTexture(selfPtr, key);
-            return TextureBase.TryGetFromCache(ret);
-        }
-        
-        public void SetTexture(string key, TextureBase value)
-        {
-            cbg_ComputePipelineState_SetTexture(selfPtr, key, value != null ? value.selfPtr : IntPtr.Zero);
-        }
-        
-        public string GetVertexLayoutName(int index)
-        {
-            var ret = cbg_ComputePipelineState_GetVertexLayoutName(selfPtr, index);
-            return System.Runtime.InteropServices.Marshal.PtrToStringUni(ret);
-        }
-        
-        public void SetVertexLayoutName(int index, string name)
-        {
-            cbg_ComputePipelineState_SetVertexLayoutName(selfPtr, index, name);
-        }
-        
-        public VertexLayoutFormat GetVertexLayoutFormat(int index)
-        {
-            var ret = cbg_ComputePipelineState_GetVertexLayoutFormat(selfPtr, index);
-            return (VertexLayoutFormat)ret;
-        }
-        
-        public void SetVertexLayoutFormat(int index, VertexLayoutFormat format)
-        {
-            cbg_ComputePipelineState_SetVertexLayoutFormat(selfPtr, index, (int)format);
-        }
-        
-        public int GetVertexLayoutSemasntics(int index)
-        {
-            var ret = cbg_ComputePipelineState_GetVertexLayoutSemasntics(selfPtr, index);
-            return ret;
-        }
-        
-        public void SetVertexLayoutSemasntics(int index, int semantics)
-        {
-            cbg_ComputePipelineState_SetVertexLayoutSemasntics(selfPtr, index, semantics);
         }
         
         /// <summary>

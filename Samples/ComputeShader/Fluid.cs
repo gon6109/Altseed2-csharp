@@ -608,6 +608,7 @@ struct Particle
 
 struct Vertex{
     float3 Position;
+    float3 Normal;
     int Color;
     float2 UV1;
     float2 UV2;
@@ -669,7 +670,7 @@ void main(uint3 dtid : SV_DispatchThreadID)
             buildVBIB.SetVector4F("ParticleRadius", new Vector4F(ParticleRadius, 0, 0, 0));
             buildVBIB.SetVector4F("Color", new Vector4F(0.2f, 0.2f, 1f, 1f));
 
-            var renderTexture = RenderTexture.Create(new Vector2I(300, 300), TextureFormat.R8G8B8A8_UNORM);
+            var renderTexture = RenderTexture.Create(new Vector2I(300, 300), TextureFormat.R8G8B8A8_UNORM, false);
 
             var camera = new CameraNode()
             {
@@ -698,6 +699,7 @@ void main(uint3 dtid : SV_DispatchThreadID)
 struct PS_INPUT
 {
     float4  Position : SV_POSITION;
+    float4  Normal : NORMAL0;
     float4  Color    : COLOR0;
     float2  UV1 : UV0;
     float2  UV2 : UV1;
@@ -729,6 +731,7 @@ struct PS_INPUT
 {
     float4  Position : SV_POSITION;
     float4  Color    : COLOR0;
+    float4  Normal : NORMAL0;
     float2  UV1 : UV0;
     float2  UV2 : UV1;
 };
@@ -838,6 +841,7 @@ float4 main(PS_INPUT input) : SV_TARGET
 
                 if (Engine.Keyboard.GetKeyState(Key.Space) == ButtonState.Push)
                 {
+                    renderTexture.Save("aa.png");
                     step = !step;
                 }
 

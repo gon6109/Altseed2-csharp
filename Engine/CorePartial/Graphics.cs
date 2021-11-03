@@ -7,31 +7,39 @@ namespace Altseed2
     /// 頂点の情報を格納する構造体
     /// </summary>
     [Serializable]
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Explicit)]
     public struct Vertex : IEquatable<Vertex>
     {
         /// <summary>
         /// 座標
         /// </summary>
+        [FieldOffset(0)]
         public Vector3F Position;
 
         /// <summary>
         /// 法線
         /// </summary>
+        [FieldOffset(16)]
         public Vector3F Normal;
 
         /// <summary>
         /// 色
         /// </summary>
+        [FieldOffset(28)]
         public Color Color;
+
         /// <summary>
         /// UV値1
         /// </summary>
+        [FieldOffset(32)]
         public Vector2F UV1;
+
         /// <summary>
         /// UV値2
         /// </summary>
+        [FieldOffset(40)]
         public Vector2F UV2;
+
 
         /// <summary>
         /// <see cref="Vertex"/>の新しいインスタンスを生成します。

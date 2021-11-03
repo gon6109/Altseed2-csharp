@@ -1001,6 +1001,8 @@ float4 main(PS_INPUT input) : SV_TARGET
             Engine.AddNode(node2);
 
             tc.LoopBody(null, null);
+        }
+
         public void VisibleTransformNodeInfo()
         {
             var tc = new TestCore(new Configuration() { VisibleTransformInfo = true });

@@ -46,6 +46,8 @@ namespace Sample
             Samples.Add(new Sample("PostEffect/GaussianBlur", "ガウスぼかしのポストエフェクトを適用します。", typeof(PostEffectGaussianBlur)));
             Samples.Add(new Sample("PostEffect/LightBloom", "ライトブルームのポストエフェクトを適用します。", typeof(PostEffectLightBloom)));
             Samples.Add(new Sample("CustomPostEffect", "自作のポストエフェクトを適用します。", typeof(CustomPostEffect)));
+            Samples.Add(new Sample("Movie", "映像を再生します。", typeof(Movie)));
+            Samples.Add(new Sample("Fluid", "2D流体シミュレーションを行います．", typeof(Fluid)));
 
             SamplesString = string.Join('\t', Samples.Select(s => s.Name));
 

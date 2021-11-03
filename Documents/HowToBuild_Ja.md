@@ -3,26 +3,26 @@
 ## 必須
 - [.NET Core SDK 3.1](https://dotnet.microsoft.com/download/dotnet-core/3.1)
 
-- その他: [Coreのdocument](Core/documents/development/HowToBuild_Ja.md)を参照
+- その他: [Coreのdocument](../Core/documents/development/HowToBuild_Ja.md)を参照
 
 ## Build
 
 ### コアの取得
 
-- Windows の場合： `Scripts/Pull.bat` を実行します。
+- Windows の場合： `scripts/Pull.bat` を実行します。
 
-- Mac/Linux の場合： `Scripts/Pull.sh` を実行します。
+- Mac/Linux の場合： `scripts/Pull.sh` を実行します。
 
 ### コアをビルド
 
 次のスクリプトを実行します。
 
-- Windows の場合： `Scripts/BuildCore.bat`
-- Mac/Linux の場合： `Scripts/BuildCore_Mac.sh`
+- Windows の場合： `scripts/BuildCore.bat`
+- Mac/Linux の場合： `scripts/BuildCore_Mac.sh`
 
 ### バインディングを生成
 
-スクリプト `Scripts/generate_bindings.py` を実行します。
+スクリプト `scripts/generate_bindings.py` を実行します。
 
 ### エンジンをビルド
 

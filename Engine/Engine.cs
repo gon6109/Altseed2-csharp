@@ -234,6 +234,8 @@ namespace Altseed2
                 _tool.Render();
             }
 
+            _currentCamera = null;
+
             // 描画を終了
             if (!Graphics.EndFrame()) return false;
             return true;
@@ -241,6 +243,7 @@ namespace Altseed2
 
         internal static void DrawCameraGroup(RenderedCamera camera, SortedDictionary<int, HashSet<IDrawn>> drawns)
         {
+            _currentCamera = camera;
             Renderer.Camera = camera;
 
             // カリングの結果
@@ -281,6 +284,11 @@ namespace Altseed2
 
                         if (cullingIds.BinarySearch(cdrawn.CullingId) < 0) continue;
 
+                        node.Draw();
+                        requireRender = true;
+                    }
+                    else if (node is IDrawn drawn)
+                    {
                         node.Draw();
                         requireRender = true;
                     }
@@ -512,6 +520,11 @@ namespace Altseed2
 
         public static Collision3DWorld Collision3DWorld => _collision3DWorld ?? throw new InvalidOperationException("Collision3DWorld機能が初期化されていません。");
         private static Collision3DWorld _collision3DWorld;
+        
+        /// 現在使用しているカメラ
+        /// </summary>
+        internal static RenderedCamera CurrentCamera => _currentCamera;
+        private static RenderedCamera _currentCamera;
 
         #endregion
 

@@ -13,48 +13,137 @@ namespace Altseed2.Test
     class ComputeShader
     {
         [StructLayout(LayoutKind.Sequential)]
-        public struct Particle : IEquatable<Particle>
+        public struct InputData
         {
-            public Vector2F Current;
-            public Vector2F Next;
-            public Vector2F Velocity;
+            public float value1;
+            public float value2;
+        };
 
-            public readonly bool Equals(Particle other) => Current == other.Current && Next == other.Next && Velocity == other.Velocity;
-
-            public readonly override bool Equals(object obj) => obj is Vertex v && Equals(v);
-
-            public readonly override int GetHashCode() => HashCode.Combine(Current, Next, Velocity);
-
-            public static bool operator ==(Particle v1, Particle v2) => v1.Equals(v2);
-            public static bool operator !=(Particle v1, Particle v2) => !v1.Equals(v2);
+        [StructLayout(LayoutKind.Sequential)]
+        public struct OutputData
+        {
+            public float value;
         };
 
         [Test, Apartment(ApartmentState.STA)]
-        public void SpriteNodeWithMaterial()
+        public void ComputeShaderBasic()
         {
             var tc = new TestCore();
             tc.Init();
 
-            var texture = Texture2D.Load(@"TestData/IO/AltseedPink.png");
-            Assert.NotNull(texture);
+            string csCode1 = @"
+struct CS_INPUT{
+    float value1;
+    float value2;
+};
 
-            var buffer = Buffer<Particle>.Create(BufferUsageType.Compute, 10000);
+struct CS_OUTPUT{
+    float value;
+};
+
+cbuffer CB : register(b0)
+{
+  float4 offset;
+};
+
+RWStructuredBuffer<CS_INPUT> read : register(u0);
+RWStructuredBuffer<CS_OUTPUT> write : register(u1);
+
+[numthreads(1, 1, 1)]
+void main(uint3 dtid : SV_DispatchThreadID)
+{
+   write[dtid.x].value = read[dtid.x].value1 * read[dtid.x].value2 + offset.x;
+}
+";
+
+            string csCode2 = @"
+struct CS_INPUT{
+    float value1;
+    float value2;
+};
+
+struct CS_OUTPUT{
+    float value;
+};
+
+cbuffer CB : register(b0)
+{
+  float4 offset;
+};
+
+RWStructuredBuffer<CS_INPUT> read : register(u0);
+RWStructuredBuffer<CS_OUTPUT> write : register(u1);
+
+[numthreads(1, 1, 1)]
+void main(uint3 dtid : SV_DispatchThreadID)
+{
+   write[dtid.x].value = read[dtid.x].value1 * read[dtid.x].value2 * offset.x;
+}
+";
+
+            var pip1 = ComputePipelineState.Create();
+            pip1.Shader = Shader.Create("cs1", csCode1, ShaderStage.Compute);
+            int offset = 100;
+            pip1.SetVector4F("offset", new Vector4F(offset, 0, 0, 0));
+
+            var pip2 = ComputePipelineState.Create();
+            pip2.Shader = Shader.Create("cs2", csCode2, ShaderStage.Compute);
+            pip2.SetVector4F("offset", new Vector4F(offset, 0, 0, 0));
+
+            int dataSize = 256;
+
+            var read = Buffer<InputData>.Create(BufferUsageType.Compute, dataSize);
             {
-                var data = buffer.Lock();
-                for (int i = 0; i < buffer.Count; i++)
+                var data = read.Lock();
+                for (int i = 0; i < read.Count; i++)
                 {
-                    data[i] = new Particle()
+                    data[i] = new InputData()
                     {
-                        Current = new Vector2F(i / 100 * 10, i % 100 * 10),
-                        Velocity = new Vector2F(0, 0),
+                        value1 = i * 2,
+                        value2 = i * 2 + 1,
                     };
                 }
-                buffer.Unlock();
+                read.Unlock();
             }
 
-            var 
+            var write1 = Buffer<OutputData>.Create(BufferUsageType.Compute, dataSize);
+            var write2 = Buffer<OutputData>.Create(BufferUsageType.Compute, dataSize);
 
-            tc.LoopBody(null, null);
+            Engine.Graphics.CommandList.Begin();
+            Engine.Graphics.CommandList.UploadBuffer(read);
+
+            Engine.Graphics.CommandList.BeginComputePass();
+
+            Engine.Graphics.CommandList.SetComputeBuffer(read, 0);
+            Engine.Graphics.CommandList.SetComputeBuffer(write1, 1);
+            Engine.Graphics.CommandList.ComputePipelineState = pip1;
+            Engine.Graphics.CommandList.Dispatch(dataSize, 1, 1);
+
+            Engine.Graphics.CommandList.SetComputeBuffer(read, 0);
+            Engine.Graphics.CommandList.SetComputeBuffer(write2, 1);
+            Engine.Graphics.CommandList.ComputePipelineState = pip2;
+            Engine.Graphics.CommandList.Dispatch(dataSize, 1, 1);
+
+            Engine.Graphics.CommandList.EndComputePass();
+
+            Engine.Graphics.CommandList.ReadbackBuffer(read);
+            Engine.Graphics.CommandList.ReadbackBuffer(write1);
+            Engine.Graphics.CommandList.ReadbackBuffer(write2);
+
+            Engine.Graphics.CommandList.End();
+            Engine.Graphics.ExecuteCommandList();
+            Engine.Graphics.WaitFinish();
+
+
+            var readValues = read.Read();
+            var write1Values = write1.Read();
+            var write2Values = write2.Read();
+
+            for (int i = 0; i < readValues.Length; i++)
+            {
+                Assert.AreEqual(write1Values[i].value, readValues[i].value1 * readValues[i].value2 + offset);
+                Assert.AreEqual(write2Values[i].value, readValues[i].value1 * readValues[i].value2 * offset);
+            }
 
             tc.End();
         }

@@ -198,12 +198,14 @@ namespace Altseed2
             if (drawDefaultCamera3DGroup)
             {
                 DrawCamera3DGroup(_DefaultCamera3D, _Drawn3DCollection.GetDrawns());
+                ResetCurrentCamera();
             }
 
             if (drawDefaultCameraGroup)
             {
                 // カメラが 1 つもない場合はデフォルトカメラを使用
                 DrawCameraGroup(_DefaultCamera, _DrawnCollection.GetDrawns());
+                ResetCurrentCamera();
             }
 
             // 特定のカメラに映りこむノードを描画
@@ -214,6 +216,7 @@ namespace Altseed2
                     foreach (var camera in _Camera3DNodes[i])
                     {
                         DrawCamera3DGroup(camera.RenderedCamera, _Drawn3DCollection[i]);
+                        ResetCurrentCamera();
                     }
                 }
                 if (drawCustomCameraGroup)
@@ -221,6 +224,7 @@ namespace Altseed2
                     foreach (var camera in _CameraNodes[i])
                     {
                         DrawCameraGroup(camera.RenderedCamera, _DrawnCollection[i]);
+                        ResetCurrentCamera();
                     }
                 }
             }
@@ -234,11 +238,17 @@ namespace Altseed2
                 _tool.Render();
             }
 
-            _currentCamera = null;
+            ResetCurrentCamera();
 
             // 描画を終了
             if (!Graphics.EndFrame()) return false;
             return true;
+        }
+
+        private static void ResetCurrentCamera()
+        {
+            _currentCamera = null;
+            _current3DCamera = null;
         }
 
         internal static void DrawCameraGroup(RenderedCamera camera, SortedDictionary<int, HashSet<IDrawn>> drawns)
@@ -322,6 +332,7 @@ namespace Altseed2
         internal static void DrawCamera3DGroup(RenderedCamera3D camera, SortedDictionary<int, HashSet<IDrawn3D>> drawns)
         {
             Renderer3D.Camera = camera;
+            _current3DCamera = camera;
 
             var requireRender = false;
 
@@ -520,11 +531,19 @@ namespace Altseed2
 
         public static Collision3DWorld Collision3DWorld => _collision3DWorld ?? throw new InvalidOperationException("Collision3DWorld機能が初期化されていません。");
         private static Collision3DWorld _collision3DWorld;
-        
+
+        /// <summary>
         /// 現在使用しているカメラ
         /// </summary>
         internal static RenderedCamera CurrentCamera => _currentCamera;
         private static RenderedCamera _currentCamera;
+
+
+        /// <summary>
+        /// 現在使用している3Dカメラ
+        /// </summary>
+        internal static RenderedCamera3D Current3DCamera => _current3DCamera;
+        private static RenderedCamera3D _current3DCamera;
 
         #endregion
 

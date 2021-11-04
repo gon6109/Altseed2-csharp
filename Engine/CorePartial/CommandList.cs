@@ -79,8 +79,16 @@ namespace Altseed2
         {
             set
             {
-                value.SetMatrix44F("matView", Engine.CurrentCamera.ViewMatrix);
-                value.SetMatrix44F("matProjection", Engine.CurrentCamera.ProjectionMatrix);
+                if (Engine.CurrentCamera != null)
+                {
+                    value.SetMatrix44F("matView", Engine.CurrentCamera.ViewMatrix);
+                    value.SetMatrix44F("matProjection", Engine.CurrentCamera.ProjectionMatrix);
+                }
+                else if (Engine.Current3DCamera != null)
+                {
+                    value.SetMatrix44F("matView", Engine.Current3DCamera.ViewMatrix);
+                    value.SetMatrix44F("matProjection", Engine.Current3DCamera.ProjectionMatrix);
+                }
                 cbg_CommandList_SetMaterial(this.selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
             }
         }

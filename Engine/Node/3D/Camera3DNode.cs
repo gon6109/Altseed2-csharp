@@ -142,6 +142,8 @@ namespace Altseed2
 
         internal override void Update()
         {
+            base.Update();
+
             if (_RequireCalcTransform || _TargetSize != (TargetTexture?.Size ?? Engine.WindowSize))
             {
                 _TargetSize = (TargetTexture?.Size ?? Engine.WindowSize);
@@ -158,8 +160,6 @@ namespace Altseed2
 
                 _RequireCalcTransform = false;
             }
-
-            base.Update();
         }
 
         #region Node

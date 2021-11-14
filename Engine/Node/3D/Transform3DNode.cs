@@ -132,10 +132,10 @@ namespace Altseed2
 
         internal override void Update()
         {
+            base.Update();
+
             if (_RequireCalcTransform)
                 UpdateTransform();
-
-            base.Update();
         }
 
         /// <summary>

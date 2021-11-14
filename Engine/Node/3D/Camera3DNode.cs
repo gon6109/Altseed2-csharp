@@ -144,22 +144,27 @@ namespace Altseed2
         {
             base.Update();
 
-            if (_RequireCalcTransform || _TargetSize != (TargetTexture?.Size ?? Engine.WindowSize))
+            if (_TargetSize != (TargetTexture?.Size ?? Engine.WindowSize))
             {
-                _TargetSize = (TargetTexture?.Size ?? Engine.WindowSize);
-
-                var at = new Vector3F(0, 0, 1) - CenterPosition;
-                at = Matrix44F.GetQuaternion(Quaternion).Transform3D(at);
-
-                var up = new Vector3F(0, 1, 0);
-                up = Matrix44F.GetQuaternion(Quaternion).Transform3D(up);
-
-                RenderedCamera.ViewMatrix =
-                Matrix44F.GetPerspectiveFovLH(MathHelper.DegreeToRadian(FoV), (float)_TargetSize.X / _TargetSize.Y, ClippingStart, ClippingEnd)
-                * Matrix44F.GetLookAtLH(Position - CenterPosition, Position + at, up);
-
-                _RequireCalcTransform = false;
+                CalcTransform();
             }
+        }
+
+        private protected override void CalcTransform()
+        {
+            _TargetSize = (TargetTexture?.Size ?? Engine.WindowSize);
+
+            var at = new Vector3F(0, 0, 1) - CenterPosition;
+            at = Matrix44F.GetQuaternion(Quaternion).Transform3D(at);
+
+            var up = new Vector3F(0, 1, 0);
+            up = Matrix44F.GetQuaternion(Quaternion).Transform3D(up);
+
+            RenderedCamera.ViewMatrix =
+            Matrix44F.GetPerspectiveFovLH(MathHelper.DegreeToRadian(FoV), (float)_TargetSize.X / _TargetSize.Y, ClippingStart, ClippingEnd)
+            * Matrix44F.GetLookAtLH(Position - CenterPosition, Position + at, up);
+
+            base.CalcTransform();
         }
 
         #region Node

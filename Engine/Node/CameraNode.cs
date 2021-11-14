@@ -97,19 +97,26 @@ namespace Altseed2
         {
             base.Update();
 
-            if (_RequireCalcTransform || _TargetSize != (TargetTexture?.Size ?? Engine.WindowSize))
+            if (_TargetSize != (TargetTexture?.Size ?? Engine.WindowSize))
             {
-                _TargetSize = (TargetTexture?.Size ?? Engine.WindowSize);
-
-                RenderedCamera.ViewMatrix =
-                Matrix44F.GetTranslation2D(CenterPosition - _TargetSize / 2)
-                * Matrix44F.GetScale2D(new Vector2F(1f, 1f) / Scale)
-                * Matrix44F.GetRotationZ(MathHelper.DegreeToRadian(-Angle))
-                * Matrix44F.GetTranslation2D(-Position);
-                // NOTE: DrawnNodeのTransformとは逆
-
-                _RequireCalcTransform = false;
+                CalcTransform();
             }
+        }
+
+        private protected override void CalcTransform()
+        {
+            _TargetSize = (TargetTexture?.Size ?? Engine.WindowSize);
+
+            RenderedCamera.ViewMatrix =
+            Matrix44F.GetTranslation2D(CenterPosition - _TargetSize / 2)
+            * Matrix44F.GetScale2D(new Vector2F(1f, 1f) / Scale)
+            * Matrix44F.GetRotationZ(MathHelper.DegreeToRadian(-Angle))
+            * Matrix44F.GetTranslation2D(-Position);
+            // NOTE: DrawnNodeのTransformとは逆
+
+            _RequireCalcTransform = false;
+
+            base.CalcTransform();
         }
 
         #region Node

@@ -3578,7 +3578,7 @@ namespace Altseed2
             }
         }
         
-        internal static Buffer Create(BufferUsageType usage, int size)
+        public static Buffer Create(BufferUsageType usage, int size)
         {
             var ret = cbg_Buffer_Create((int)usage, size);
             return Buffer.TryGetFromCache(ret);
@@ -3769,6 +3769,11 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern Vector3I cbg_Shader_GetNumThreads(IntPtr selfPtr);
+        
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern IntPtr cbg_Shader_GetCode(IntPtr selfPtr);
         
         
@@ -3799,6 +3804,15 @@ namespace Altseed2
             get
             {
                 var ret = cbg_Shader_GetUniformSize(selfPtr);
+                return ret;
+            }
+        }
+        
+        public Vector3I NumThreads
+        {
+            get
+            {
+                var ret = cbg_Shader_GetNumThreads(selfPtr);
                 return ret;
             }
         }
@@ -5929,11 +5943,19 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_Graphics_ExecuteCommandList(IntPtr selfPtr);
+        private static extern void cbg_Graphics_ExecuteCommandList_(IntPtr selfPtr);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_Graphics_WaitFinish(IntPtr selfPtr);
+        private static extern void cbg_Graphics_ExecuteCommandList_CommandList(IntPtr selfPtr, IntPtr commandList);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Graphics_WaitFinish_(IntPtr selfPtr);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_Graphics_WaitFinish_CommandList(IntPtr selfPtr, IntPtr commandList);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -6028,12 +6050,22 @@ namespace Altseed2
         
         public void ExecuteCommandList()
         {
-            cbg_Graphics_ExecuteCommandList(selfPtr);
+            cbg_Graphics_ExecuteCommandList_(selfPtr);
+        }
+        
+        public void ExecuteCommandList(CommandList commandList)
+        {
+            cbg_Graphics_ExecuteCommandList_CommandList(selfPtr, commandList != null ? commandList.selfPtr : IntPtr.Zero);
         }
         
         public void WaitFinish()
         {
-            cbg_Graphics_WaitFinish(selfPtr);
+            cbg_Graphics_WaitFinish_(selfPtr);
+        }
+        
+        public void WaitFinish(CommandList commandList)
+        {
+            cbg_Graphics_WaitFinish_CommandList(selfPtr, commandList != null ? commandList.selfPtr : IntPtr.Zero);
         }
         
         /// <summary>

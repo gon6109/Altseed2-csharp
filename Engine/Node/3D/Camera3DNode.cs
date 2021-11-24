@@ -88,7 +88,7 @@ namespace Altseed2
             {
                 if (_ClearColor == value) return;
                 _ClearColor = value;
-                _Camera.RenderPassParameter = new RenderPassParameter(_ClearColor, _IsColorCleared, true);
+                _Camera.RenderPassParameter = new RenderPassParameter(_ClearColor, _IsColorCleared, _IsDepthCleared);
             }
         }
         private Color _ClearColor;
@@ -103,10 +103,26 @@ namespace Altseed2
             {
                 if (_IsColorCleared == value) return;
                 _IsColorCleared = value;
-                _Camera.RenderPassParameter = new RenderPassParameter(_ClearColor, _IsColorCleared, true);
+                _Camera.RenderPassParameter = new RenderPassParameter(_ClearColor, _IsColorCleared, _IsDepthCleared);
             }
         }
         private bool _IsColorCleared;
+
+
+        /// <summary>
+        /// 描画開始時にDepthを塗りつぶすかどうかを取得または設定します。
+        /// </summary>
+        public bool IsDepthCleared
+        {
+            get => _IsDepthCleared;
+            set
+            {
+                if (_IsDepthCleared == value) return;
+                _IsDepthCleared = value;
+                _Camera.RenderPassParameter = new RenderPassParameter(_ClearColor, _IsColorCleared, _IsDepthCleared);
+            }
+        }
+        private bool _IsDepthCleared;
 
         /// <summary>
         /// <see cref="CameraNode"/>新しいインスタンスを生成します。

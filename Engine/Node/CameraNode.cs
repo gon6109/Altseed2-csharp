@@ -41,7 +41,7 @@ namespace Altseed2
             {
                 if (_ClearColor == value) return;
                 _ClearColor = value;
-                _Camera.RenderPassParameter = new RenderPassParameter(_ClearColor, _IsColorCleared, true);
+                _Camera.RenderPassParameter = new RenderPassParameter(_ClearColor, _IsColorCleared, _IsDepthCleared);
             }
         }
         private Color _ClearColor;

@@ -29,7 +29,7 @@ namespace Altseed2
 
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (!HasBit(node.CameraGroup, mask)) continue;
 
                 var group = _Sorted[i];
@@ -49,7 +49,7 @@ namespace Altseed2
 
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (!HasBit(node.CameraGroup, mask)) continue;
 
                 var group = _Sorted[i];
@@ -63,7 +63,7 @@ namespace Altseed2
 
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
 
                 if (HasBit(old, mask) && !HasBit(node.CameraGroup, mask))
                 {
@@ -99,7 +99,7 @@ namespace Altseed2
 
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
 
                 if (!HasBit(node.CameraGroup, mask)) continue;
 
@@ -117,7 +117,7 @@ namespace Altseed2
         internal SortedDictionary<int, HashSet<IDrawn>> GetDrawns() => _Drawns;
         internal SortedDictionary<int, HashSet<IDrawn>> this[int cameraGroup] => _Sorted[cameraGroup];
 
-        private bool HasBit(ulong value, uint mask) => (value & mask) != 0;
+        private bool HasBit(ulong value, ulong mask) => (value & mask) != 0;
     }
 
     internal class Drawn3DCollection
@@ -146,7 +146,7 @@ namespace Altseed2
 
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (!HasBit(node.CameraGroup, mask)) continue;
 
                 var group = _Sorted[i];
@@ -166,7 +166,7 @@ namespace Altseed2
 
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (!HasBit(node.CameraGroup, mask)) continue;
 
                 var group = _Sorted[i];
@@ -180,7 +180,7 @@ namespace Altseed2
 
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
 
                 if (HasBit(old, mask) && !HasBit(node.CameraGroup, mask))
                 {
@@ -216,7 +216,7 @@ namespace Altseed2
 
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
 
                 if (!HasBit(node.CameraGroup, mask)) continue;
 
@@ -234,7 +234,7 @@ namespace Altseed2
         internal SortedDictionary<int, HashSet<IDrawn3D>> GetDrawns() => _Drawns;
         internal SortedDictionary<int, HashSet<IDrawn3D>> this[int cameraGroup] => _Sorted[cameraGroup];
 
-        private bool HasBit(ulong value, uint mask) => (value & mask) != 0;
+        private bool HasBit(ulong value, ulong mask) => (value & mask) != 0;
     }
 
     internal class CameraNodeCollection
@@ -255,7 +255,7 @@ namespace Altseed2
         {
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (HasBit(node.Group, mask))
                 {
                     _Lists[i].Add(node);
@@ -268,7 +268,7 @@ namespace Altseed2
         {
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (HasBit(node.Group, mask))
                 {
                     _Lists[i].Remove(node);
@@ -281,7 +281,7 @@ namespace Altseed2
         {
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (HasBit(oldGroup, mask) && !HasBit(node.Group, mask))
                 {
                     _Lists[i].Remove(node);
@@ -295,7 +295,7 @@ namespace Altseed2
 
         internal List<CameraNode> this[int index] => _Lists[index];
 
-        private bool HasBit(ulong value, uint mask) => (value & mask) != 0;
+        private bool HasBit(ulong value, ulong mask) => (value & mask) != 0;
     }
 
     internal class Camera3DNodeCollection
@@ -316,7 +316,7 @@ namespace Altseed2
         {
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (HasBit(node.Group, mask))
                 {
                     _Lists[i].Add(node);
@@ -329,7 +329,7 @@ namespace Altseed2
         {
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (HasBit(node.Group, mask))
                 {
                     _Lists[i].Remove(node);
@@ -342,7 +342,7 @@ namespace Altseed2
         {
             for (int i = 0; i < Engine.MaxCameraGroupCount; i++)
             {
-                var mask = 1u << i;
+                var mask = 1ul << i;
                 if (HasBit(oldGroup, mask) && !HasBit(node.Group, mask))
                 {
                     _Lists[i].Remove(node);
@@ -356,6 +356,6 @@ namespace Altseed2
 
         internal List<Camera3DNode> this[int index] => _Lists[index];
 
-        private bool HasBit(ulong value, uint mask) => (value & mask) != 0;
+        private bool HasBit(ulong value, ulong mask) => (value & mask) != 0;
     }
 }

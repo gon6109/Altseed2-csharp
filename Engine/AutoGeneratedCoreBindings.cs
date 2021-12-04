@@ -5610,6 +5610,10 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_CommandList_SetMaterialWithConstantBuffer(IntPtr selfPtr, IntPtr material, IntPtr constantBuffer);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_CommandList_BeginComputePass(IntPtr selfPtr);
         
         [DllImport("Altseed2_Core")]
@@ -5619,6 +5623,10 @@ namespace Altseed2
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
         private static extern void cbg_CommandList_SetComputeBuffer(IntPtr selfPtr, IntPtr buffer, int stride, int unit);
+        
+        [DllImport("Altseed2_Core")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        private static extern void cbg_CommandList_SetComputePipelineStateWithConstantBuffer(IntPtr selfPtr, IntPtr computePipelineState, IntPtr constantBuffer);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -5817,6 +5825,11 @@ namespace Altseed2
             cbg_CommandList_SetIndexBuffer(selfPtr, ib != null ? ib.selfPtr : IntPtr.Zero, stride, offset);
         }
         
+        internal void SetMaterialWithConstantBuffer(Material material, Buffer constantBuffer)
+        {
+            cbg_CommandList_SetMaterialWithConstantBuffer(selfPtr, material != null ? material.selfPtr : IntPtr.Zero, constantBuffer != null ? constantBuffer.selfPtr : IntPtr.Zero);
+        }
+        
         public void BeginComputePass()
         {
             cbg_CommandList_BeginComputePass(selfPtr);
@@ -5830,6 +5843,11 @@ namespace Altseed2
         internal void SetComputeBuffer(Buffer buffer, int stride, int unit)
         {
             cbg_CommandList_SetComputeBuffer(selfPtr, buffer != null ? buffer.selfPtr : IntPtr.Zero, stride, unit);
+        }
+        
+        internal void SetComputePipelineStateWithConstantBuffer(ComputePipelineState computePipelineState, Buffer constantBuffer)
+        {
+            cbg_CommandList_SetComputePipelineStateWithConstantBuffer(selfPtr, computePipelineState != null ? computePipelineState.selfPtr : IntPtr.Zero, constantBuffer != null ? constantBuffer.selfPtr : IntPtr.Zero);
         }
         
         public void Dispatch(int x, int y, int z)

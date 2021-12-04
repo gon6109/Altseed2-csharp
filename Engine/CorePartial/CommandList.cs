@@ -92,5 +92,21 @@ namespace Altseed2
                 cbg_CommandList_SetMaterial(this.selfPtr, value != null ? value.selfPtr : IntPtr.Zero);
             }
         }
+
+        public void SetMaterialWithConstantBuffer<T>(Material material, Buffer<T> constantBuffer) where T : struct
+        {
+            cbg_CommandList_SetMaterialWithConstantBuffer(
+                this.selfPtr,
+                material != null ? material.selfPtr : IntPtr.Zero,
+                constantBuffer != null ? constantBuffer.InternalBuffer.selfPtr : IntPtr.Zero);
+        }
+
+        public void SetComputePipelineStateWithConstantBuffer<T>(ComputePipelineState computePipelineState, Buffer<T> constantBuffer) where T : struct
+        {
+            cbg_CommandList_SetComputePipelineStateWithConstantBuffer(
+                this.selfPtr,
+                computePipelineState != null ? computePipelineState.selfPtr : IntPtr.Zero,
+                constantBuffer != null ? constantBuffer.InternalBuffer.selfPtr : IntPtr.Zero);
+        }
     }
 }

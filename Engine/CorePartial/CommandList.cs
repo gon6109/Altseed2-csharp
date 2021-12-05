@@ -67,12 +67,12 @@ namespace Altseed2
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="computeBuffer"></param>
-        /// <param name="stride"></param>
         /// <param name="unit"></param>
-        public void SetComputeBuffer<T>(Buffer<T> computeBuffer, int unit) where T : struct
+        /// <param name="shaderStage"></param>
+        public void SetComputeBuffer<T>(Buffer<T> computeBuffer, int unit, ShaderStage shaderStage = ShaderStage.Compute) where T : struct
         {
             int stride = Marshal.SizeOf<T>();
-            SetComputeBuffer(computeBuffer.InternalBuffer, stride, unit);
+            SetComputeBuffer(computeBuffer.InternalBuffer, stride, unit, shaderStage);
         }
 
         public Material Material

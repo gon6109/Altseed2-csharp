@@ -5622,7 +5622,7 @@ namespace Altseed2
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        private static extern void cbg_CommandList_SetComputeBuffer(IntPtr selfPtr, IntPtr buffer, int stride, int unit);
+        private static extern void cbg_CommandList_SetComputeBuffer(IntPtr selfPtr, IntPtr buffer, int stride, int unit, int shaderStage);
         
         [DllImport("Altseed2_Core")]
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -5840,9 +5840,9 @@ namespace Altseed2
             cbg_CommandList_EndComputePass(selfPtr);
         }
         
-        internal void SetComputeBuffer(Buffer buffer, int stride, int unit)
+        internal void SetComputeBuffer(Buffer buffer, int stride, int unit, ShaderStage shaderStage)
         {
-            cbg_CommandList_SetComputeBuffer(selfPtr, buffer != null ? buffer.selfPtr : IntPtr.Zero, stride, unit);
+            cbg_CommandList_SetComputeBuffer(selfPtr, buffer != null ? buffer.selfPtr : IntPtr.Zero, stride, unit, (int)shaderStage);
         }
         
         internal void SetComputePipelineStateWithConstantBuffer(ComputePipelineState computePipelineState, Buffer constantBuffer)
